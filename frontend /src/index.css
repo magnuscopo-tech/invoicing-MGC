@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-surface: #f6f7fb;
+    --color-border: #e6e9f0;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-[color:var(--color-surface)] font-sans text-ink-900 antialiased;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd2e0 transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-ink-200;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-ink-300;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-ink-100 bg-white shadow-card;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-pop;
+  }
+
+  .text-heading {
+    @apply text-xl font-semibold tracking-tight text-ink-950 md:text-2xl;
+  }
+
+  .text-subtle {
+    @apply text-sm text-ink-500;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-[13px] font-medium text-ink-700;
+  }
+
+  .field-input {
+    @apply w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-900 outline-none transition-all duration-200 placeholder:text-ink-300 focus:border-primary-400 focus:ring-4 focus:ring-primary-100 disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400;
+  }
+
+  .field-input-error {
+    @apply border-red-300 focus:border-red-400 focus:ring-red-100;
+  }
+
+  .field-error {
+    @apply mt-1.5 flex items-center gap-1 text-xs font-medium text-red-600;
+  }
+
+  .table-head {
+    @apply whitespace-nowrap px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-ink-500;
+  }
+
+  .table-cell {
+    @apply whitespace-nowrap px-4 py-3.5 text-sm text-ink-700;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-ink-100;
+  }
+
+  .skeleton::after {
+    @apply absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/70 to-transparent;
+    content: "";
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-600 transition-all duration-200 hover:bg-primary-50 hover:text-primary-700;
+  }
+
+  .nav-link-active {
+    @apply bg-primary-600 text-white shadow-[0_8px_20px_-8px_rgba(29,93,245,0.8)] hover:bg-primary-600 hover:text-white;
+  }
+}
+
+/* Toast + date picker skins kept global so components stay utility-only. */
+.Toastify__toast {
+  border-radius: 14px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  box-shadow: 0 20px 45px -20px rgba(16, 24, 40, 0.35);
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+/* The calendar must sit above the modal layer (z-50) and the toast container.
+   It is portalled to the body, so this is the only stacking context involved. */
+#datepicker-portal {
+  position: relative;
+  z-index: 9999;
+}
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}
+
+.react-datepicker {
+  font-family: Inter, system-ui, sans-serif;
+  border-color: #e6e9f0;
+  border-radius: 14px;
+  box-shadow: 0 20px 45px -20px rgba(16, 24, 40, 0.35);
+  overflow: hidden;
+}
+
+.react-datepicker__header {
+  background-color: #f6f7fb;
+  border-bottom-color: #e6e9f0;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #1d5df5;
+  border-radius: 8px;
+}
+
+.react-datepicker__day:hover {
+  border-radius: 8px;
+}

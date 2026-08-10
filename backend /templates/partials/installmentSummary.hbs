@@ -1,0 +1,44 @@
+{{!--
+  Split-billing blocks. Both are absent on an ordinary document, so a normal
+  proforma or tax invoice renders exactly as it did before this partial existed.
+
+  On an installment proforma the items table above lists the WHOLE scope, while
+  the payable figure is one slice of it. The note is what stops a client reading
+  line amounts that sum to the contract against a payable that does not.
+--}}
+
+{{#if installment}}
+  <p class="installment-note">
+    <strong>{{installment.caption}}{{#if installment.label}} &middot; {{installment.label}}{{/if}}.</strong>
+    The items above describe the full scope of work. This proforma covers
+    {{installment.percent}}% of the agreed contract value.
+  </p>
+{{/if}}
+
+{{#if settlement}}
+  <section class="settlement">
+    <div class="label">Installments Settled Against This Invoice</div>
+    <table class="schedule">
+      <thead>
+        <tr>
+          <th>Installment</th>
+          <th>Proforma No</th>
+          <th class="center">Share</th>
+          <th class="center">Received On</th>
+          <th class="num">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each settlement.rows}}
+          <tr>
+            <td>{{this.label}}</td>
+            <td class="mono">{{this.docNumber}}</td>
+            <td class="center">{{this.percent}}%</td>
+            <td class="center">{{#if this.paidOnFormatted}}{{this.paidOnFormatted}}{{else}}&ndash;{{/if}}</td>
+            <td class="num">{{this.amountFormatted}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </section>
+{{/if}}

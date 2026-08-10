@@ -1,0 +1,47 @@
+<section class="closing">
+  <div class="bank">
+    <div class="label">Bank Details</div>
+    <div class="bank-grid">
+      <div class="bank-item">
+        <div class="bank-key">Account Name</div>
+        <div class="bank-value">{{bank.accountName}}</div>
+      </div>
+      <div class="bank-item">
+        <div class="bank-key">Account Number</div>
+        <div class="bank-value">{{bank.accountNumber}}</div>
+      </div>
+      <div class="bank-item">
+        <div class="bank-key">IFSC</div>
+        <div class="bank-value">{{bank.ifsc}}</div>
+      </div>
+      {{#if bank.bankName}}
+        <div class="bank-item">
+          <div class="bank-key">Bank</div>
+          <div class="bank-value">{{bank.bankName}}</div>
+        </div>
+      {{/if}}
+      {{#if bank.branch}}
+        <div class="bank-item">
+          <div class="bank-key">Branch</div>
+          <div class="bank-value">{{bank.branch}}</div>
+        </div>
+      {{/if}}
+      {{#if bank.bankGstin}}
+        <div class="bank-item">
+          <div class="bank-key">GSTIN</div>
+          <div class="bank-value">{{bank.bankGstin}}</div>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="sign">
+    <div class="sign-for">For {{company.name}}</div>
+    {{#if company.signatureUrl}}
+      <img class="sign-img" src="{{company.signatureUrl}}" alt="Authorised Signatory" />
+    {{else}}
+      <div class="sign-space"></div>
+    {{/if}}
+    <div class="sign-caption">Authorised Signatory</div>
+  </div>
+</section>

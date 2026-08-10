@@ -1,0 +1,371 @@
+<style>
+  /*
+   * One stylesheet for both the printed PDF and the on-screen preview. Puppeteer
+   * prints with the "print" media type, so the screen-only rules below dress the
+   * preview as a sheet of paper without ever reaching the file.
+   *
+   * Page margins are set by Puppeteer, not here: CSS padding on a container only
+   * pads the first and last page, which leaves every middle page of a long
+   * document running into the paper edge.
+   */
+  :root {
+    --ink: #10192b;
+    --ink-soft: #46536b;
+    --ink-faint: #7c8798;
+    --line: #dfe4ec;
+    --line-strong: #b9c1cf;
+    --accent: #16324f;
+    --accent-wash: #f4f6f9;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    font-size: 10.5px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .page {
+    max-width: 186mm;
+    margin: 0 auto;
+    background: #ffffff;
+  }
+
+  @media screen {
+    body { background: #eceff4; padding: 28px 16px; }
+    .page {
+      padding: 16mm 14mm;
+      box-shadow: 0 1px 2px rgba(16, 25, 43, 0.08), 0 12px 32px rgba(16, 25, 43, 0.10);
+      border-radius: 2px;
+    }
+  }
+
+  .label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* ------------------------------- Masthead ------------------------------- */
+
+  .masthead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  .brand-logo { max-height: 52px; max-width: 200px; object-fit: contain; }
+  .brand-name {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--accent);
+  }
+  .brand-address {
+    margin-top: 7px;
+    font-size: 9.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    white-space: pre-line;
+    max-width: 74mm;
+  }
+  .brand-contact { margin-top: 5px; font-size: 9.5px; color: var(--ink-soft); }
+
+  .doc-id { text-align: right; flex-shrink: 0; }
+  .doc-title {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 3.4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    line-height: 1.15;
+    /* Letter-spacing trails the last glyph, which would leave the title sitting
+       a few pixels short of the right edge everything else aligns to. */
+    margin-right: -3.4px;
+  }
+  .doc-number {
+    margin-top: 5px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+  .doc-number-label {
+    display: block;
+    margin-bottom: 1px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* Dates and place of supply sit with the number they describe, rather than in
+     a band of their own. */
+  .doc-meta { margin-top: 9px; }
+  .doc-meta-row { font-size: 9.8px; font-weight: 600; line-height: 1.75; }
+  .doc-meta-row .k {
+    margin-right: 7px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* -------------------------------- Parties -------------------------------- */
+
+  .parties { display: flex; gap: 0; margin-top: 20px; }
+  .party { flex: 1; padding-right: 20px; }
+  .party + .party { padding-right: 0; padding-left: 20px; border-left: 1px solid var(--line); }
+  .party-name { margin-top: 6px; font-size: 12px; font-weight: 700; letter-spacing: -0.1px; }
+  .party-body {
+    margin-top: 3px;
+    font-size: 9.8px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    white-space: pre-line;
+  }
+  .party-tax { margin-top: 5px; font-size: 9.8px; }
+  .party-tax span { color: var(--ink-faint); }
+
+  .intro {
+    margin: 16px 0 0;
+    padding: 10px 12px;
+    font-size: 10px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    background: var(--accent-wash);
+    border-left: 2px solid var(--line-strong);
+    border-radius: 2px;
+  }
+
+  /* --------------------------------- Items --------------------------------- */
+
+  table.items {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+  /* Repeat the head on every page a long item list spills onto. */
+  table.items thead { display: table-header-group; }
+  table.items tr { break-inside: avoid; page-break-inside: avoid; }
+
+  table.items th {
+    padding: 8px 10px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    text-align: left;
+    color: #ffffff;
+    background: var(--accent);
+  }
+  table.items th:first-child { border-radius: 2px 0 0 2px; }
+  table.items th:last-child { border-radius: 0 2px 2px 0; }
+
+  table.items td {
+    padding: 8px 10px;
+    font-size: 10px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--line);
+  }
+  table.items tbody tr:first-child td { border-top: none; }
+
+  .item-index { color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+  .item-desc { font-weight: 600; white-space: pre-line; }
+  .item-sub { margin-top: 2px; font-size: 9px; color: var(--ink-faint); }
+
+  .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .center { text-align: center; }
+
+  /* -------------------------------- Summary -------------------------------- */
+
+  .summary {
+    display: flex;
+    gap: 24px;
+    margin-top: 18px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .summary-left { flex: 1; padding-top: 2px; }
+  .words { margin-top: 3px; font-size: 10px; line-height: 1.55; color: var(--ink-soft); }
+
+  .totals { width: 76mm; flex-shrink: 0; }
+  .t-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 12px;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--line);
+  }
+  .t-row span:last-child { font-variant-numeric: tabular-nums; color: var(--ink); }
+  .t-row.grand {
+    margin-top: 6px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 3px;
+    background: var(--accent);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .t-row.grand span:last-child { color: #ffffff; font-size: 13px; }
+
+  /* ------------------------------ Split billing ----------------------------- */
+
+  /* Only ever rendered on a document belonging to a billing plan. */
+
+  .doc-subtitle {
+    margin-top: 3px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /*
+   * The items table on an installment prints the full scope while the payable
+   * is one slice of it. This note carries that explanation, so it sits directly
+   * under the items rather than down in the terms where it would be missed.
+   */
+  .installment-note {
+    margin: 14px 0 0;
+    padding: 9px 12px;
+    font-size: 9.8px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    background: var(--accent-wash);
+    border-left: 2px solid var(--line-strong);
+    border-radius: 2px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .installment-note strong { color: var(--ink); }
+
+  /* Contract context above the slice's own figures - quieter than the rows it
+     introduces, because it is background rather than the amount being asked for. */
+  .t-row.context {
+    font-size: 9.8px;
+    color: var(--ink-faint);
+    border-bottom: 1px dashed var(--line);
+  }
+  .t-row.context span:last-child { color: var(--ink-soft); }
+
+  .t-row.slice-head {
+    margin-top: 5px;
+    padding-bottom: 3px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  /* The installments a closing tax invoice settles. */
+  .settlement {
+    margin-top: 18px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  table.schedule {
+    width: 100%;
+    margin-top: 6px;
+    border-collapse: collapse;
+  }
+  table.schedule th {
+    padding: 6px 10px;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--ink-faint);
+    background: var(--accent-wash);
+    border-bottom: 1px solid var(--line);
+  }
+  table.schedule td {
+    padding: 6px 10px;
+    font-size: 9.8px;
+    border-bottom: 1px solid var(--line);
+  }
+  table.schedule .mono { font-weight: 600; letter-spacing: 0.2px; }
+
+  /* -------------------------- Terms, bank, signature ------------------------ */
+
+  .terms {
+    margin-top: 16px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .terms-body {
+    margin-top: 5px;
+    font-size: 9.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    white-space: pre-line;
+  }
+
+  /*
+   * Kept whole: a signature block stranded on its own page reads as an
+   * afterthought. The vertical space here is deliberately tight - every pixel
+   * saved is one less chance of the block missing the page it belongs on.
+   */
+  .closing {
+    display: flex;
+    gap: 24px;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .bank { flex: 1; }
+  .bank-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 20px;
+    margin-top: 5px;
+  }
+  .bank-item { min-width: 42mm; }
+  .bank-key { font-size: 8.5px; letter-spacing: 0.4px; text-transform: uppercase; color: var(--ink-faint); }
+  .bank-value { font-size: 10px; font-weight: 600; }
+
+  .sign {
+    width: 62mm;
+    flex-shrink: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .sign-for { font-size: 10px; font-weight: 700; }
+  .sign-img { max-height: 42px; max-width: 150px; object-fit: contain; margin: 6px auto 0; }
+  .sign-space { height: 34px; }
+  .sign-caption {
+    margin-top: 6px;
+    padding-top: 6px;
+    font-size: 9.5px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line-strong);
+  }
+</style>

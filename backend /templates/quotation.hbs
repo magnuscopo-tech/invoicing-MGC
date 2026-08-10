@@ -1,0 +1,51 @@
+<title>{{docLabel}} {{docNumber}}</title>
+{{> styles}}
+
+<div class="page">
+  {{> header}}
+
+  {{#if introLine}}
+    <p class="intro">{{introLine}}</p>
+  {{/if}}
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th style="width:26px;" class="center">#</th>
+        <th>Description</th>
+        <th style="width:52px;" class="center">Qty</th>
+        <th style="width:92px;" class="num">Unit Price</th>
+        {{#if showDiscountColumn}}<th style="width:64px;" class="num">Disc %</th>{{/if}}
+        <th style="width:104px;" class="num">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each items}}
+        <tr>
+          <td class="center item-index">{{this.index}}</td>
+          <td>
+            <div class="item-desc">{{this.description}}</div>
+            {{#if this.unit}}<div class="item-sub">Unit: {{this.unit}}</div>{{/if}}
+          </td>
+          <td class="center">{{this.qty}}</td>
+          <td class="num">{{this.unitPriceFormatted}}</td>
+          {{#if ../showDiscountColumn}}<td class="num">{{this.discountPercent}}</td>{{/if}}
+          <td class="num">{{this.amountFormatted}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <section class="summary">
+    <div class="summary-left">
+      <div class="label">Amount in Words</div>
+      <div class="words">{{amountInWords}}</div>
+    </div>
+    <div class="totals">
+      <div class="t-row grand"><span>Total</span><span>{{totalAmountFormatted}}</span></div>
+    </div>
+  </section>
+
+  {{> footer}}
+  {{> bankDetails}}
+</div>

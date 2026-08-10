@@ -1,0 +1,71 @@
+<title>{{docLabel}} {{docNumber}}</title>
+{{> styles}}
+
+<div class="page">
+  {{> header}}
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th style="width:26px;" class="center">#</th>
+        <th>Description</th>
+        <th style="width:52px;" class="center">Qty</th>
+        <th style="width:92px;" class="num">Unit Price</th>
+        {{#if showDiscountColumn}}<th style="width:64px;" class="num">Disc %</th>{{/if}}
+        <th style="width:104px;" class="num">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each items}}
+        <tr>
+          <td class="center item-index">{{this.index}}</td>
+          <td>
+            <div class="item-desc">{{this.description}}</div>
+            {{#if this.unit}}<div class="item-sub">Unit: {{this.unit}}</div>{{/if}}
+          </td>
+          <td class="center">{{this.qty}}</td>
+          <td class="num">{{this.unitPriceFormatted}}</td>
+          {{#if ../showDiscountColumn}}<td class="num">{{this.discountPercent}}</td>{{/if}}
+          <td class="num">{{this.amountFormatted}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  {{> installmentSummary}}
+
+  <section class="summary">
+    <div class="summary-left">
+      <div class="label">Amount in Words</div>
+      <div class="words">{{amountInWords}}</div>
+    </div>
+    <div class="totals">
+      {{#if installment}}
+        {{!-- Where this slice sits within the contract, printed above the
+              slice's own figures so the payable can be placed at a glance. --}}
+        <div class="t-row context"><span>Contract Value</span><span>{{installment.contractTotalFormatted}}</span></div>
+        {{#if installment.hasPreviouslyBilled}}
+          <div class="t-row context"><span>Previously Billed</span><span>{{installment.previouslyBilledFormatted}}</span></div>
+        {{/if}}
+        <div class="t-row context"><span>Balance to be Billed</span><span>{{installment.balanceFormatted}}</span></div>
+        <div class="t-row slice-head"><span>This Installment &middot; {{installment.percent}}%</span><span></span></div>
+      {{/if}}
+
+      <div class="t-row"><span>Subtotal</span><span>{{subTotalFormatted}}</span></div>
+      {{#if gstApplicable}}
+        <div class="t-row"><span>GST @ {{gstPercent}}%</span><span>{{gstAmountFormatted}}</span></div>
+      {{/if}}
+
+      {{#if settlement}}
+        <div class="t-row"><span>Invoice Total</span><span>{{totalAmountFormatted}}</span></div>
+        <div class="t-row"><span>Less: Received Against Installments</span><span>{{settlement.receivedFormatted}}</span></div>
+        <div class="t-row grand"><span>Net Payable</span><span>{{settlement.netPayableFormatted}}</span></div>
+      {{else}}
+        <div class="t-row grand"><span>Payable Amount</span><span>{{totalAmountFormatted}}</span></div>
+      {{/if}}
+    </div>
+  </section>
+
+  {{> footer}}
+  {{> bankDetails}}
+</div>

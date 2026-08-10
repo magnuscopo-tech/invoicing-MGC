@@ -1,0 +1,56 @@
+<header class="masthead">
+  <div>
+    {{#if company.logoUrl}}
+      <img class="brand-logo" src="{{company.logoUrl}}" alt="{{company.name}}" />
+    {{else}}
+      <div class="brand-name">{{company.name}}</div>
+    {{/if}}
+    <div class="brand-address">{{company.address}}</div>
+    <div class="brand-contact">
+      {{#if company.email}}{{company.email}}{{/if}}{{#if company.phone}}{{#if company.email}} &middot; {{/if}}{{company.phone}}{{/if}}
+    </div>
+  </div>
+
+  <div class="doc-id">
+    <div class="doc-title">{{docLabel}}</div>
+    {{#if installment}}
+      <div class="doc-subtitle">{{installment.caption}}{{#if installment.label}} &middot; {{installment.label}}{{/if}}</div>
+    {{/if}}
+    <div class="doc-number">
+      <span class="doc-number-label">{{docNumberLabel}}</span>
+      {{docNumber}}
+    </div>
+    <div class="doc-meta">
+      <div class="doc-meta-row"><span class="k">Issue Date</span>{{issueDateFormatted}}</div>
+      {{#if dueDateFormatted}}
+        <div class="doc-meta-row"><span class="k">{{dueDateLabel}}</span>{{dueDateFormatted}}</div>
+      {{/if}}
+      <div class="doc-meta-row"><span class="k">Place of Supply</span>{{placeOfSupply}}</div>
+    </div>
+  </div>
+</header>
+
+<section class="parties">
+  <div class="party">
+    <div class="label">Billed By</div>
+    <div class="party-name">{{company.name}}</div>
+    <div class="party-body">{{company.address}}</div>
+    <div class="party-tax">
+      <span>GSTIN</span> {{company.gstin}}
+      {{#if company.pan}}&nbsp;&nbsp;<span>PAN</span> {{company.pan}}{{/if}}
+      {{#if company.stateCode}}&nbsp;&nbsp;<span>State Code</span> {{company.stateCode}}{{/if}}
+    </div>
+  </div>
+
+  <div class="party">
+    <div class="label">Billed To</div>
+    <div class="party-name">{{client.name}}</div>
+    <div class="party-body">{{client.address}}</div>
+    {{#if showBuyerGstin}}
+      <div class="party-tax"><span>GSTIN</span> {{client.gstin}}</div>
+    {{/if}}
+    {{#if client.contactPerson}}
+      <div class="party-tax"><span>Contact</span> {{client.contactPerson}}</div>
+    {{/if}}
+  </div>
+</section>

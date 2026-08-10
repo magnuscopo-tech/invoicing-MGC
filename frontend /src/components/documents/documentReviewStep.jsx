@@ -1,0 +1,79 @@
+import NotesTermsEditor from "./notesTermsEditor";
+import TotalsSummary from "./totalsSummary";
+import ItemsTable from "./itemsTable";
+import { DOC_LABELS } from "../../constants/document.constants";
+import { formatDisplayDate } from "../../Utlis/dateFormat";
+
+const SummaryRow = ({ label, value }) => (
+  <div className="flex items-start justify-between gap-4 py-2">
+    <dt className="text-[13px] text-ink-500">{label}</dt>
+    <dd className="max-w-[60%] text-right text-[13px] font-medium text-ink-900">
+      {value || "—"}
+    </dd>
+  </div>
+);
+
+export default function DocumentReviewStep({
+  formData,
+  numberPreview = null,
+  selectedCompany = null,
+  selectedClient = null,
+  defaultTerms = "",
+  totals,
+  dueDateLabel = "Due Date",
+  onChange = () => {},
+  onResetTerms = () => {},
+}) {
+  return (
+    <section className="space-y-6">
+      <NotesTermsEditor
+        value={formData.notesTerms}
+        docType={formData.docType}
+        defaultTerms={defaultTerms}
+        onChange={onChange}
+        onResetToDefault={onResetTerms}
+      />
+
+      <div className="space-y-4 border-t border-ink-100 pt-6">
+        <h2 className="text-[15px] font-semibold text-ink-950">
+          Review before saving
+        </h2>
+
+        <div className="grid gap-5 lg:grid-cols-3">
+          <div className="rounded-2xl border border-ink-100 bg-white p-5 lg:col-span-2">
+            <dl className="divide-y divide-ink-100">
+              <SummaryRow
+                label="Document type"
+                value={DOC_LABELS[formData.docType]}
+              />
+              <SummaryRow
+                label="Number (preview)"
+                value={numberPreview?.docNumber}
+              />
+              <SummaryRow label="Seller" value={selectedCompany?.name} />
+              <SummaryRow label="Buyer" value={selectedClient?.name} />
+              <SummaryRow
+                label="Issue date"
+                value={formatDisplayDate(formData.issueDate)}
+              />
+              <SummaryRow
+                label={dueDateLabel}
+                value={formatDisplayDate(formData.dueDate)}
+              />
+              <SummaryRow label="Line items" value={formData.items.length} />
+            </dl>
+          </div>
+
+          <TotalsSummary
+            subTotal={totals.subTotal}
+            gstAmount={totals.gstAmount}
+            totalAmount={totals.totalAmount}
+            gstApplicable={formData.gstApplicable}
+          />
+        </div>
+
+        <ItemsTable items={formData.items} editable={false} />
+      </div>
+    </section>
+  );
+}
