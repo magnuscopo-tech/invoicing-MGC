@@ -1,6 +1,6 @@
-const apiUserUrlPrefix =`http://localhost:5000/api/`;
+const apiUserUrlPrefix =`https://invoicing-mgc.onrender.com/api/`;
 
-export const apiHost =`http://localhost:5000`;
+export const apiHost =`https://invoicing-mgc.onrender.com`;
 
 export const apiConstant = {
   // Auth
