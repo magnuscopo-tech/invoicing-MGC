@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 import {
   ArrowRight,
   BadgeCheck,
+  Eye,
+  EyeOff,
   FileText,
   Layers,
   Lock,
@@ -44,6 +46,7 @@ export default function LoginScreen() {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const isRegister = mode === "register";
 
@@ -110,6 +113,7 @@ export default function LoginScreen() {
   const switchMode = () => {
     setMode(isRegister ? "login" : "register");
     setErrors({});
+    setShowPassword(false);
   };
 
   return (
@@ -269,13 +273,24 @@ export default function LoginScreen() {
             <InputField
               label="Password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               required
               hint={isRegister ? "At least 8 characters." : ""}
               value={formData.password}
               error={errors.password}
               onChange={onFieldChange}
+              suffix={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-400 transition-colors hover:bg-ink-50 hover:text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              }
             />
 
             <CustomButton

@@ -12,6 +12,7 @@ export default function InputField({
   required = false,
   disabled = false,
   prefix = "",
+  suffix = null,
   className = "",
   // id of a <datalist>, for a field that suggests existing values while still
   // accepting anything typed.
@@ -47,9 +48,15 @@ export default function InputField({
           className={classNames(
             "field-input",
             prefix && "pl-8",
+            suffix && "pr-11",
             error && "field-input-error"
           )}
         />
+        {suffix && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            {suffix}
+          </div>
+        )}
       </div>
 
       {error ? (
