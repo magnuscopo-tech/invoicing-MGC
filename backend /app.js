@@ -6,7 +6,6 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const compression = require("compression");
-const rateLimit = require("express-rate-limit");
 const multer = require("multer");
 
 const connectDb = require("./config/db");
@@ -49,22 +48,6 @@ app.use(compression());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
-
-// Auth endpoints are the only brute-forceable surface in this API.
-app.use(
-  "/api/auth",
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 30,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-      success: false,
-      message: "Too many attempts, please try again later",
-      statusCode: 429,
-    },
-  })
-);
 
 // "statements" holds an uploaded workbook only for the life of one import; the
 // importer deletes it as soon as the rows are booked.
