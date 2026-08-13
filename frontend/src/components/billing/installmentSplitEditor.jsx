@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import CustomButton from "../custom/customButton";
-import { classNames } from "../../Utlis/Common/commonMethod";
+import { classNames, itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import {
   MAX_INSTALLMENTS,
@@ -27,7 +27,8 @@ export default function InstallmentSplitEditor({
   disabled = false,
   onChange = () => {},
 }) {
-  const percents = installments.map((row) => row.percent);
+  const installmentRows = itemsOf(installments);
+  const percents = installmentRows.map((row) => row.percent);
   const total = percentTotal(percents);
   const amounts = previewInstallmentAmounts(contractTotal, percents);
   const remaining = Math.round((100 - total) * 100) / 100;
@@ -43,22 +44,25 @@ export default function InstallmentSplitEditor({
 
   const updateRow = (index, patch) => {
     onChange(
-      installments.map((row, position) =>
+      installmentRows.map((row, position) =>
         position === index ? { ...row, ...patch } : row
       )
     );
   };
 
   const addRow = () => {
-    if (installments.length >= MAX_INSTALLMENTS) return;
+    if (installmentRows.length >= MAX_INSTALLMENTS) return;
     // Seeded with whatever is unallocated, so the common case of splitting an
     // existing row needs no arithmetic from the user.
-    onChange([...installments, { percent: remaining > 0 ? remaining : 0, label: "" }]);
+    onChange([
+      ...installmentRows,
+      { percent: remaining > 0 ? remaining : 0, label: "" },
+    ]);
   };
 
   const removeRow = (index) => {
-    if (installments.length <= MIN_INSTALLMENTS) return;
-    onChange(installments.filter((_, position) => position !== index));
+    if (installmentRows.length <= MIN_INSTALLMENTS) return;
+    onChange(installmentRows.filter((_, position) => position !== index));
   };
 
   return (
@@ -85,7 +89,7 @@ export default function InstallmentSplitEditor({
       </div>
 
       <div className="space-y-2.5">
-        {installments.map((row, index) => (
+        {installmentRows.map((row, index) => (
           <div
             key={index}
             className="flex flex-wrap items-end gap-3 rounded-xl border border-ink-200 bg-white p-3"
@@ -142,7 +146,7 @@ export default function InstallmentSplitEditor({
 
             <button
               type="button"
-              disabled={disabled || installments.length <= MIN_INSTALLMENTS}
+                disabled={disabled || installmentRows.length <= MIN_INSTALLMENTS}
               onClick={() => removeRow(index)}
               className={classNames(
                 "mb-1.5 rounded-lg p-2 text-ink-400 transition-colors",

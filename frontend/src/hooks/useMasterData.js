@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { handleGetAllCompanies } from "../Services/apiCalling/companyApis";
 import { handleGetAllClients } from "../Services/apiCalling/clientApis";
 import { handleGetAllServices } from "../Services/apiCalling/serviceApis";
+import { itemsOf } from "../Utlis/Common/commonMethod";
 
 // Loads the three dropdown sources the document wizard depends on.
 export default function useMasterData() {
@@ -20,9 +21,9 @@ export default function useMasterData() {
           handleGetAllServices({ page: 1, limit: 200, isActive: true }),
         ]);
 
-        setCompanies(companyList?.items || []);
-        setClients(clientList?.items || []);
-        setServices(serviceList?.items || []);
+        setCompanies(itemsOf(companyList?.items));
+        setClients(itemsOf(clientList?.items));
+        setServices(itemsOf(serviceList?.items));
       } finally {
         setLoading(false);
       }

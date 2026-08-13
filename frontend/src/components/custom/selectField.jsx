@@ -1,5 +1,5 @@
 import { AlertCircle, ChevronDown } from "lucide-react";
-import { classNames } from "../../Utlis/Common/commonMethod";
+import { classNames, itemsOf } from "../../Utlis/Common/commonMethod";
 
 export default function SelectField({
   label,
@@ -14,6 +14,8 @@ export default function SelectField({
   className = "",
   onChange = () => {},
 }) {
+  const optionList = itemsOf(options);
+
   return (
     <div className={className}>
       {label && (
@@ -37,7 +39,7 @@ export default function SelectField({
           )}
         >
           <option value="">{placeholder}</option>
-          {options.map((option) => (
+          {optionList.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>

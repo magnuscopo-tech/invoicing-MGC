@@ -1,4 +1,5 @@
 import { formatCompactCurrency } from "../../Utlis/currencyFormat";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 
 /*
  * Ordered magnitude bars. Every row is directly labelled with its value, which
@@ -10,15 +11,16 @@ export default function HorizontalBars({
   formatValue = formatCompactCurrency,
   emptyLabel = "Nothing to show yet.",
 }) {
-  const max = Math.max(1, ...rows.map((row) => Number(row.value) || 0));
+  const rowList = itemsOf(rows);
+  const max = Math.max(1, ...rowList.map((row) => Number(row.value) || 0));
 
-  if (rows.length === 0) {
+  if (rowList.length === 0) {
     return <p className="py-10 text-center text-sm text-ink-400">{emptyLabel}</p>;
   }
 
   return (
     <ul className="space-y-3">
-      {rows.map((row) => {
+      {rowList.map((row) => {
         const value = Number(row.value) || 0;
         const percent = Math.max(value > 0 ? 2 : 0, (value / max) * 100);
 

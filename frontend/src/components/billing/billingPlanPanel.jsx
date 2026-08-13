@@ -10,7 +10,7 @@ import CustomButton from "../custom/customButton";
 import StatusBadge from "../custom/statusBadge";
 import ConfirmDialog from "../modal/confirmDialog";
 import RecordInstallmentPaymentModal from "../modal/documents/recordInstallmentPaymentModal";
-import { classNames } from "../../Utlis/Common/commonMethod";
+import { classNames, itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
 import {
@@ -42,6 +42,25 @@ const Figure = ({ label, value, tone = "" }) => (
   </div>
 );
 
+const EMPTY_SUMMARY = {
+  receivedTotal: 0,
+  billedTotal: 0,
+  unbilledTotal: 0,
+  unallocatedPercent: 0,
+  allocatedPercent: 0,
+  nextInstallmentIndex: 0,
+  paidCount: 0,
+  installmentCount: 0,
+  isFullyAllocated: true,
+};
+
+const EMPTY_ACTIONS = {
+  canGenerateInstallment: false,
+  canRaiseFinalInvoice: false,
+  canReallocateCancelled: false,
+  canCloseEarly: false,
+};
+
 /*
  * The schedule for a job the client pays in stages, and the one action that
  * makes sense at each point: raise the next installment, record what came in,
@@ -63,15 +82,17 @@ export default function BillingPlanPanel({
 
   if (!plan) return null;
 
-  const { summary, actions } = plan;
+  const summary = { ...EMPTY_SUMMARY, ...(plan.summary || {}) };
+  const actions = { ...EMPTY_ACTIONS, ...(plan.actions || {}) };
+  const installments = itemsOf(plan.installments);
 
   const onGenerate = async () => {
     setBusy(true);
     try {
       const result = await handleGenerateInstallment(plan._id);
-      if (!result) return;
+      if (!result?.document) return;
       SuccessMessage(`Installment raised as ${result.document.docNumber}.`);
-      onChanged(result.plan);
+      onChanged(result.plan || plan);
       onOpenDocument(result.document);
     } finally {
       setBusy(false);
@@ -82,12 +103,12 @@ export default function BillingPlanPanel({
     setBusy(true);
     try {
       const result = await handleRaiseFinalInvoice(plan._id);
-      if (!result) return;
+      if (!result?.document) return;
       SuccessMessage(
         `Closing tax invoice ${result.document.docNumber} raised. Approve it to close the plan.`
       );
       setConfirmInvoice(false);
-      onChanged(result.plan);
+      onChanged(result.plan || plan);
       onOpenDocument(result.document);
     } finally {
       setBusy(false);
@@ -150,7 +171,7 @@ export default function BillingPlanPanel({
         )}
 
         <div className="mt-5 space-y-2.5 border-t border-ink-100 pt-4">
-          {plan.installments.map((slice) => {
+          {installments.map((slice) => {
             const isCurrent =
               currentDocumentId &&
               String(slice.documentId) === String(currentDocumentId);

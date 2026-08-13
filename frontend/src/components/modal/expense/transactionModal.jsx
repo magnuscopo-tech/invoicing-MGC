@@ -7,7 +7,7 @@ import TextAreaField from "../../custom/textAreaField";
 import DatePickerField from "../../custom/datePickerField";
 import CustomButton from "../../custom/customButton";
 import { commonValidator } from "../../../Utlis/Common/commonValidator";
-import { classNames } from "../../../Utlis/Common/commonMethod";
+import { classNames, itemsOf } from "../../../Utlis/Common/commonMethod";
 import {
   handleCreateTransaction,
   handleUpdateTransaction,
@@ -95,6 +95,7 @@ export default function TransactionModal({
   onSuccess = () => {},
 }) {
   const isEdit = Boolean(transaction?._id);
+  const partyList = itemsOf(parties);
   const [formData, setFormData] = useState(emptyForm(defaultDirection));
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -350,7 +351,7 @@ export default function TransactionModal({
         {/* A datalist gives free-text plus suggestions, so an existing party can
             be reused without locking the field to names already in the book. */}
         <datalist id="cash-book-parties">
-          {parties.map((party) => (
+          {partyList.map((party) => (
             <option key={party} value={party} />
           ))}
         </datalist>

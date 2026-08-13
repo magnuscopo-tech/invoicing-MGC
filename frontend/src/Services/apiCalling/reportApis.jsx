@@ -11,6 +11,7 @@ import {
   GetAuditTrailApi,
   GetDocumentLedgerApi,
 } from "../apiMethod";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 
 const handleGetFinancialSummary = async (params) => {
   try {
@@ -133,8 +134,9 @@ const handleGetAuditTrail = async (params) => {
   try {
     const response = await GetAuditTrailApi(params);
     if (response.statusCode === 200) {
+      const items = itemsOf(response.raw.data);
       return {
-        items: response.raw.data || [],
+        items,
         total: response.raw.total || 0,
         page: response.raw.page || 1,
         limit: response.raw.limit || 20,
@@ -152,8 +154,9 @@ const handleGetDocumentLedger = async (params) => {
   try {
     const response = await GetDocumentLedgerApi(params);
     if (response.statusCode === 200) {
+      const items = itemsOf(response.raw.data);
       return {
-        items: response.raw.data || [],
+        items,
         total: response.raw.total || 0,
         page: response.raw.page || 1,
         limit: response.raw.limit || 50,

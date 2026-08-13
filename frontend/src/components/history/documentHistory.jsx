@@ -14,11 +14,10 @@ import useMasterData from "../../hooks/useMasterData";
 import {
   handleDownloadDocument,
   handleGetAllDocuments,
+  handleUpdateDocumentStatus,
 } from "../../Services/apiCalling/documentApis";
-import {
-  downloadBlobAsFile,
-  safeFileName,
-} from "../../Utlis/Common/commonMethod";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
+import { DOC_STATUS } from "../../constants/document.constants";
 import { ROUTES } from "../../constants/route.constants";
 
 const LIMIT = 20;
@@ -59,7 +58,7 @@ export default function DocumentHistory() {
       if (filters.toDate) params.toDate = filters.toDate;
 
       const response = await handleGetAllDocuments(params);
-      setDocuments(response?.items || []);
+      setDocuments(itemsOf(response?.items));
       setTotal(response?.total || 0);
     } finally {
       setLoading(false);
@@ -90,11 +89,17 @@ export default function DocumentHistory() {
   };
 
   const onDownload = async (document) => {
-    const blob = await handleDownloadDocument(document._id);
-    if (!blob) return;
-    downloadBlobAsFile(blob, safeFileName(document.docNumber));
-    // A draft is promoted on its first download, so the list is refreshed.
-    if (document.status === "draft") fetchDocuments();
+    const printed = await handleDownloadDocument(
+      document._id,
+      document.docNumber
+    );
+    if (!printed) return;
+    if (document.status === DOC_STATUS.draft) {
+      await handleUpdateDocumentStatus(document._id, {
+        status: DOC_STATUS.generated,
+      });
+      fetchDocuments();
+    }
   };
 
   const hasActiveFilters = Object.values(filters).some(Boolean);

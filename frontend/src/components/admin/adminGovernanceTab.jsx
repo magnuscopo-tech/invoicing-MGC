@@ -15,6 +15,7 @@ import {
   handleGetAllUsers,
   handleUpdateUserStatus,
 } from "../../Services/apiCalling/authApis";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { SuccessMessage } from "../../Utlis/Toastify/ToastMessage";
 import { formatDisplayDateTime } from "../../Utlis/dateFormat";
 
@@ -30,7 +31,16 @@ const ACTION_TONE = {
   deactivated: "danger",
 };
 
+const EMPTY_GROUP = {
+  active: 0,
+  total: 0,
+  missingGstin: 0,
+};
+
 export default function AdminGovernanceTab({ overview }) {
+  const companies = overview?.companies || EMPTY_GROUP;
+  const clients = overview?.clients || EMPTY_GROUP;
+  const services = overview?.services || EMPTY_GROUP;
   const currentUser = useSelector(selectCurrentUser);
   const [audit, setAudit] = useState(null);
   const [auditPage, setAuditPage] = useState(1);
@@ -41,6 +51,7 @@ export default function AdminGovernanceTab({ overview }) {
   const [pendingUser, setPendingUser] = useState(null);
   const [saving, setSaving] = useState(false);
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const auditRows = itemsOf(audit?.items);
 
   const fetchAudit = useCallback(async () => {
     setAuditLoading(true);
@@ -56,7 +67,7 @@ export default function AdminGovernanceTab({ overview }) {
     setUsersLoading(true);
     try {
       const result = await handleGetAllUsers({ page: 1, limit: 50 });
-      setUsers(result?.items || []);
+      setUsers(itemsOf(result?.items));
     } finally {
       setUsersLoading(false);
     }
@@ -95,17 +106,17 @@ export default function AdminGovernanceTab({ overview }) {
           {[
             {
               label: "Companies",
-              value: `${overview.companies.active} / ${overview.companies.total}`,
+              value: `${companies.active} / ${companies.total}`,
               caption: "active / total",
             },
             {
               label: "Clients",
-              value: `${overview.clients.active} / ${overview.clients.total}`,
-              caption: `${overview.clients.missingGstin} without GSTIN — quotation only`,
+              value: `${clients.active} / ${clients.total}`,
+              caption: `${clients.missingGstin} without GSTIN — quotation only`,
             },
             {
               label: "Services",
-              value: `${overview.services.active} / ${overview.services.total}`,
+              value: `${services.active} / ${services.total}`,
               caption: "active / total",
             },
           ].map((tile, index) => (
@@ -187,7 +198,7 @@ export default function AdminGovernanceTab({ overview }) {
                   ),
               },
             ]}
-            rows={users.map((row) => ({ ...row, id: row._id }))}
+            rows={itemsOf(users).map((row) => ({ ...row, id: row._id }))}
           />
         )}
       </ReportCard>
@@ -238,7 +249,7 @@ export default function AdminGovernanceTab({ overview }) {
                   render: (row) => row.performedBy?.name || "System",
                 },
               ]}
-              rows={(audit?.items || []).map((row) => ({ ...row, id: row._id }))}
+              rows={auditRows.map((row) => ({ ...row, id: row._id }))}
             />
 
             <Pagination

@@ -10,6 +10,7 @@ import {
   CATEGORICAL,
 } from "../../constants/chart.constants";
 import { DOC_LABELS } from "../../constants/document.constants";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 
 export default function AdminOverviewTab({
@@ -18,6 +19,12 @@ export default function AdminOverviewTab({
   funnel,
   breakdown,
 }) {
+  const ratios = summary?.ratios || {};
+  const counts = summary?.counts || {};
+  const trendRows = itemsOf(trend?.series);
+  const typeRows = itemsOf(breakdown?.byType);
+  const statusRows = itemsOf(breakdown?.byStatus);
+
   /*
    * Invoiced and collected now move together — a tax invoice is raised against a
    * paid proforma and approving it marks it paid — so plotting only those two
@@ -29,30 +36,30 @@ export default function AdminOverviewTab({
       key: "proformaValue",
       label: "Billed (proforma)",
       color: CATEGORICAL[0],
-      values: (trend?.series || []).map((row) => row.proformaValue),
+      values: trendRows.map((row) => row.proformaValue),
     },
     {
       key: "invoiced",
       label: "Invoiced",
       color: CATEGORICAL[1],
-      values: (trend?.series || []).map((row) => row.invoiced),
+      values: trendRows.map((row) => row.invoiced),
     },
     {
       key: "collected",
       label: "Collected",
       color: CATEGORICAL[2],
-      values: (trend?.series || []).map((row) => row.collected),
+      values: trendRows.map((row) => row.collected),
     },
   ];
 
-  const typeSegments = (breakdown?.byType || []).map((row) => ({
+  const typeSegments = typeRows.map((row) => ({
     key: row.docType,
     label: DOC_LABELS[row.docType],
     value: row.totalAmount,
     color: SERIES_COLORS[row.docType],
   }));
 
-  const statusSegments = (breakdown?.byStatus || [])
+  const statusSegments = statusRows
     .filter((row) => row.count > 0)
     .map((row) => ({
       key: row.status,
@@ -102,13 +109,13 @@ export default function AdminOverviewTab({
               },
               { key: "invoiceCount", label: "Count", align: "right" },
             ]}
-            rows={(trend?.series || []).map((row) => ({ ...row, id: row.month }))}
+            rows={trendRows.map((row) => ({ ...row, id: row.month }))}
           />
         }
       >
         <LineChart
           series={trendSeries}
-          categories={(trend?.series || []).map((row) => row.label)}
+          categories={trendRows.map((row) => row.label)}
         />
       </ReportCard>
 
@@ -117,19 +124,21 @@ export default function AdminOverviewTab({
           title="Quotation to cash funnel"
           description="Counts at each stage, with each stage measured against the quotation count."
         >
-          <FunnelChart stages={funnel?.stages || []} />
+          <FunnelChart stages={itemsOf(funnel?.stages)} />
 
           {summary && (
             <div className="mt-5 space-y-4 border-t border-ink-100 pt-4">
               <MeterBar
                 label="Collection rate"
-                percent={summary.ratios.collectionRate}
+                percent={ratios.collectionRate || 0}
                 caption="Settled value as a share of settled plus still-owed proformas."
               />
               <MeterBar
                 label="Quotation conversion"
-                percent={summary.ratios.quotationConversionRate}
-                caption={`${summary.counts.quotationsConverted} of ${summary.counts.quotationsTotal} quotations became a proforma.`}
+                percent={ratios.quotationConversionRate || 0}
+                caption={`${counts.quotationsConverted || 0} of ${
+                  counts.quotationsTotal || 0
+                } quotations became a proforma.`}
               />
             </div>
           )}

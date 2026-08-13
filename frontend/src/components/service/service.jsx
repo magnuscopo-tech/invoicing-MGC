@@ -16,6 +16,7 @@ import {
   handleDeleteService,
   handleGetAllServices,
 } from "../../Services/apiCalling/serviceApis";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { SuccessMessage } from "../../Utlis/Toastify/ToastMessage";
 
 const LIMIT = 12;
@@ -41,7 +42,7 @@ export default function Service() {
       if (debouncedSearch) params.search = debouncedSearch;
 
       const response = await handleGetAllServices(params);
-      setServices(response?.items || []);
+      setServices(itemsOf(response?.items));
       setTotal(response?.total || 0);
     } finally {
       setLoading(false);
@@ -96,7 +97,7 @@ export default function Service() {
 
       {loading ? (
         <CardGridLoader count={6} />
-      ) : services.length === 0 ? (
+      ) : itemsOf(services).length === 0 ? (
         <div className="card">
           <EmptyState
             icon={Package}
@@ -116,7 +117,7 @@ export default function Service() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {services.map((service) => (
+            {itemsOf(services).map((service) => (
               <ServiceCard
                 key={service._id}
                 service={service}

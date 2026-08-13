@@ -16,6 +16,7 @@ import {
   handleDeleteClient,
   handleGetAllClients,
 } from "../../Services/apiCalling/clientApis";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { SuccessMessage } from "../../Utlis/Toastify/ToastMessage";
 
 const LIMIT = 12;
@@ -41,7 +42,7 @@ export default function Client() {
       if (debouncedSearch) params.search = debouncedSearch;
 
       const response = await handleGetAllClients(params);
-      setClients(response?.items || []);
+      setClients(itemsOf(response?.items));
       setTotal(response?.total || 0);
     } finally {
       setLoading(false);
@@ -96,7 +97,7 @@ export default function Client() {
 
       {loading ? (
         <CardGridLoader count={6} />
-      ) : clients.length === 0 ? (
+      ) : itemsOf(clients).length === 0 ? (
         <div className="card">
           <EmptyState
             icon={Users}
@@ -116,7 +117,7 @@ export default function Client() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {clients.map((client) => (
+            {itemsOf(clients).map((client) => (
               <ClientCard
                 key={client._id}
                 client={client}

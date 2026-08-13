@@ -3,6 +3,7 @@ import SearchInput from "../custom/searchInput";
 import SelectField from "../custom/selectField";
 import DatePickerField from "../custom/datePickerField";
 import CustomButton from "../custom/customButton";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import {
   DOC_STATUS_OPTIONS,
   DOC_TYPE_OPTIONS,
@@ -18,6 +19,14 @@ export default function DocumentFilterBar({
   const hasActiveFilters = Object.entries(filters).some(
     ([key, value]) => key !== "page" && value
   );
+  const companyOptions = itemsOf(companies).map((company) => ({
+    value: company._id,
+    label: company.name,
+  }));
+  const clientOptions = itemsOf(clients).map((client) => ({
+    value: client._id,
+    label: client.name,
+  }));
 
   return (
     <div className="card mb-5 animate-fade-up p-4 sm:p-5">
@@ -55,10 +64,7 @@ export default function DocumentFilterBar({
           name="company"
           placeholder="All companies"
           value={filters.company}
-          options={companies.map((company) => ({
-            value: company._id,
-            label: company.name,
-          }))}
+          options={companyOptions}
           onChange={onChange}
         />
 
@@ -67,10 +73,7 @@ export default function DocumentFilterBar({
           name="client"
           placeholder="All clients"
           value={filters.client}
-          options={clients.map((client) => ({
-            value: client._id,
-            label: client.name,
-          }))}
+          options={clientOptions}
           onChange={onChange}
         />
 

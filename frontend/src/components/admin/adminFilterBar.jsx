@@ -2,6 +2,7 @@ import { FilterX, RefreshCw } from "lucide-react";
 import SelectField from "../custom/selectField";
 import DatePickerField from "../custom/datePickerField";
 import CustomButton from "../custom/customButton";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 
 // Filters sit in one row above the charts and drive every report on the screen.
 export default function AdminFilterBar({
@@ -14,6 +15,14 @@ export default function AdminFilterBar({
   onRefresh = () => {},
 }) {
   const hasActiveFilters = Object.values(filters).some(Boolean);
+  const companyOptions = itemsOf(companies).map((company) => ({
+    value: company._id,
+    label: company.name,
+  }));
+  const clientOptions = itemsOf(clients).map((client) => ({
+    value: client._id,
+    label: client.name,
+  }));
 
   return (
     <div className="card mb-5 animate-fade-up p-4 sm:p-5">
@@ -23,10 +32,7 @@ export default function AdminFilterBar({
           name="companyId"
           placeholder="All companies"
           value={filters.companyId}
-          options={companies.map((company) => ({
-            value: company._id,
-            label: company.name,
-          }))}
+          options={companyOptions}
           onChange={onChange}
         />
 
@@ -35,10 +41,7 @@ export default function AdminFilterBar({
           name="clientId"
           placeholder="All clients"
           value={filters.clientId}
-          options={clients.map((client) => ({
-            value: client._id,
-            label: client.name,
-          }))}
+          options={clientOptions}
           onChange={onChange}
         />
 

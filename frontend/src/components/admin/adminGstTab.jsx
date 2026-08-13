@@ -3,10 +3,12 @@ import DataTable from "./dataTable";
 import LineChart from "../charts/lineChart";
 import { CATEGORICAL } from "../../constants/chart.constants";
 import { GST_PERCENT } from "../../constants/document.constants";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 
 export default function AdminGstTab({ gst }) {
-  const series = gst?.series || [];
+  const series = itemsOf(gst?.series);
+  const financialYears = itemsOf(gst?.byFinancialYear);
 
   return (
     <div className="space-y-5">
@@ -124,7 +126,7 @@ export default function AdminGstTab({ gst }) {
               render: (row) => formatCurrency(row.totalAmount),
             },
           ]}
-          rows={(gst?.byFinancialYear || []).map((row) => ({
+          rows={financialYears.map((row) => ({
             ...row,
             id: row.financialYear,
           }))}

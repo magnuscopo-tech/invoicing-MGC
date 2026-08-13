@@ -4,14 +4,17 @@ import DataTable from "./dataTable";
 import HorizontalBars from "../charts/horizontalBars";
 import StatusBadge from "../custom/statusBadge";
 import { AGEING_COLORS } from "../../constants/chart.constants";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
 import { ROUTES } from "../../constants/route.constants";
 
 export default function AdminReceivablesTab({ ageing }) {
   const navigate = useNavigate();
+  const buckets = itemsOf(ageing?.buckets);
+  const documents = itemsOf(ageing?.documents);
 
-  const bars = (ageing?.buckets || []).map((bucket) => ({
+  const bars = buckets.map((bucket) => ({
     key: bucket.bucket,
     label: bucket.label,
     value: bucket.totalAmount,
@@ -39,7 +42,7 @@ export default function AdminReceivablesTab({ ageing }) {
                 render: (row) => formatCurrency(row.totalAmount),
               },
             ]}
-            rows={(ageing?.buckets || []).map((row) => ({
+            rows={buckets.map((row) => ({
               ...row,
               id: row.bucket,
             }))}
@@ -110,7 +113,7 @@ export default function AdminReceivablesTab({ ageing }) {
               render: (row) => formatCurrency(row.totalAmount),
             },
           ]}
-          rows={(ageing?.documents || []).map((row) => ({
+          rows={documents.map((row) => ({
             ...row,
             id: row._id,
           }))}

@@ -1,12 +1,14 @@
 import { ORDINAL_4 } from "../../constants/chart.constants";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCompactCurrency } from "../../Utlis/currencyFormat";
 
 // Ordered stages, so the fill uses the ordinal blue ramp rather than four
 // categorical hues. Each stage carries its own count and rate as direct labels.
 export default function FunnelChart({ stages = [] }) {
-  const max = Math.max(1, ...stages.map((stage) => stage.count || 0));
+  const stageList = itemsOf(stages);
+  const max = Math.max(1, ...stageList.map((stage) => stage.count || 0));
 
-  if (stages.every((stage) => !stage.count)) {
+  if (stageList.every((stage) => !stage.count)) {
     return (
       <p className="py-10 text-center text-sm text-ink-400">
         No documents in this period yet.
@@ -16,7 +18,7 @@ export default function FunnelChart({ stages = [] }) {
 
   return (
     <ul className="space-y-3">
-      {stages.map((stage, index) => {
+      {stageList.map((stage, index) => {
         const percent = Math.max(
           stage.count > 0 ? 3 : 0,
           (stage.count / max) * 100

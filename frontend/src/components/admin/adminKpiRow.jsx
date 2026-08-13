@@ -14,6 +14,13 @@ const TONES = {
   danger: "bg-red-50 text-red-600",
 };
 
+const EMPTY_BUCKET = {
+  totalAmount: 0,
+  taxableValue: 0,
+  gstAmount: 0,
+  count: 0,
+};
+
 // Headline numbers are stat tiles, not a chart. Four values, no plot.
 const Tile = ({ label, value, caption, icon: Icon, tone, delay }) => (
   <article
@@ -42,9 +49,11 @@ const Tile = ({ label, value, caption, icon: Icon, tone, delay }) => (
 );
 
 export default function AdminKpiRow({ summary }) {
-  if (!summary) return null;
-
-  const { invoiced, collected, outstanding, overdue, gst } = summary;
+  const invoiced = summary?.invoiced || EMPTY_BUCKET;
+  const collected = summary?.collected || EMPTY_BUCKET;
+  const outstanding = summary?.outstanding || EMPTY_BUCKET;
+  const overdue = summary?.overdue || EMPTY_BUCKET;
+  const gst = summary?.gst || EMPTY_BUCKET;
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

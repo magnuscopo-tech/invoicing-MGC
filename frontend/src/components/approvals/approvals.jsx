@@ -16,13 +16,10 @@ import {
   handleDownloadDocument,
   handleGetAllDocuments,
   handleGetDocumentDetail,
+  handleUpdateDocumentStatus,
 } from "../../Services/apiCalling/documentApis";
-import {
-  downloadBlobAsFile,
-  safeFileName,
-  classNames,
-} from "../../Utlis/Common/commonMethod";
-import { APPROVAL_STATUS } from "../../constants/document.constants";
+import { classNames, itemsOf } from "../../Utlis/Common/commonMethod";
+import { APPROVAL_STATUS, DOC_STATUS } from "../../constants/document.constants";
 import { ROUTES } from "../../constants/route.constants";
 
 const LIMIT = 20;
@@ -78,7 +75,7 @@ export default function Approvals() {
       if (debouncedSearch) params.search = debouncedSearch;
 
       const response = await handleGetAllDocuments(params);
-      setDocuments(response?.items || []);
+      setDocuments(itemsOf(response?.items));
       setTotal(response?.total || 0);
     } finally {
       setLoading(false);
@@ -94,11 +91,17 @@ export default function Approvals() {
   }, [activeTab, debouncedSearch]);
 
   const onDownload = async (document) => {
-    const blob = await handleDownloadDocument(document._id);
-    if (!blob) return;
-    downloadBlobAsFile(blob, safeFileName(document.docNumber));
-    // A draft is promoted on its first download, so the list is refreshed.
-    if (document.status === "draft") fetchDocuments();
+    const printed = await handleDownloadDocument(
+      document._id,
+      document.docNumber
+    );
+    if (!printed) return;
+    if (document.status === DOC_STATUS.draft) {
+      await handleUpdateDocumentStatus(document._id, {
+        status: DOC_STATUS.generated,
+      });
+      fetchDocuments();
+    }
   };
 
   // The approve modal needs the company's saved signature, which only the

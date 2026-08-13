@@ -30,7 +30,11 @@ import {
   handleGetPaymentModeSplit,
   handleGetTopParties,
 } from "../../Services/apiCalling/expenseApis";
-import { classNames, downloadBlobAsFile } from "../../Utlis/Common/commonMethod";
+import {
+  classNames,
+  downloadBlobAsFile,
+  itemsOf,
+} from "../../Utlis/Common/commonMethod";
 import { todayInputDate } from "../../Utlis/dateFormat";
 import {
   CATEGORY_OPTIONS,
@@ -108,16 +112,17 @@ export default function Expense() {
 
   // The category list the API will actually accept. Falls back to the bundled
   // copy if the metadata call fails, so the forms still work.
-  const categories = meta?.categories?.length ? meta.categories : TXN_CATEGORIES;
+  const metaCategories = itemsOf(meta?.categories);
+  const categories = metaCategories.length ? metaCategories : TXN_CATEGORIES;
   const categoryOptions = useMemo(
     () =>
-      meta?.categories?.length
-        ? meta.categories.map((item) => ({
+      metaCategories.length
+        ? metaCategories.map((item) => ({
             value: item.value,
             label: item.value,
           }))
         : CATEGORY_OPTIONS,
-    [meta]
+    [metaCategories]
   );
 
   useEffect(() => {
@@ -312,7 +317,7 @@ export default function Expense() {
         open={formModal.open}
         defaultDirection={formModal.direction || TXN_DIRECTION.debit}
         categories={categories}
-        parties={meta?.parties || []}
+        parties={itemsOf(meta?.parties)}
         onClose={() => setFormModal({ open: false, direction: null })}
         onSuccess={refreshAll}
       />

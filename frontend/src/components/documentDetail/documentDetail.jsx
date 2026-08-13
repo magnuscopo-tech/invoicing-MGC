@@ -41,13 +41,10 @@ import {
   handleGetDocumentChain,
   handleGetDocumentDetail,
   handleSubmitForApproval,
+  handleUpdateDocumentStatus,
 } from "../../Services/apiCalling/documentApis";
 import { handleGetBillingPlanForDocument } from "../../Services/apiCalling/billingPlanApis";
-import {
-  classNames,
-  downloadBlobAsFile,
-  safeFileName,
-} from "../../Utlis/Common/commonMethod";
+import { classNames, itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatDisplayDate, formatDisplayDateTime } from "../../Utlis/dateFormat";
 import { SuccessMessage } from "../../Utlis/Toastify/ToastMessage";
 import {
@@ -56,6 +53,7 @@ import {
   APPROVAL_STATUS,
   APPROVAL_TONE,
   CONVERSION_TARGETS,
+  DOC_STATUS,
   DOC_LABELS,
   DOC_STATUS_TONE,
   DOC_TYPE_TONE,
@@ -107,7 +105,7 @@ export default function DocumentDetail() {
         handleGetBillingPlanForDocument(id),
       ]);
       setDocument(detail);
-      setChain(chainResult?.chain || []);
+      setChain(itemsOf(chainResult?.chain));
       setBillingPlan(plan);
     } finally {
       setLoading(false);
@@ -118,16 +116,22 @@ export default function DocumentDetail() {
     fetchDocument();
   }, [fetchDocument]);
 
-  // The file is printed on request, so there is nothing to generate first. A
-  // draft is promoted to "generated" server side once it has been handed over,
-  // which is why the document is reloaded after a successful download.
+  // The file is printed from the same HTML as the preview, so Render does not
+  // need a server-side Chrome binary for downloads.
   const onDownload = async () => {
     setDownloading(true);
     try {
-      const blob = await handleDownloadDocument(document._id);
-      if (!blob) return;
-      downloadBlobAsFile(blob, safeFileName(document.docNumber));
-      if (document.status === "draft") fetchDocument();
+      const printed = await handleDownloadDocument(
+        document._id,
+        document.docNumber
+      );
+      if (!printed) return;
+      if (document.status === DOC_STATUS.draft) {
+        await handleUpdateDocumentStatus(document._id, {
+          status: DOC_STATUS.generated,
+        });
+        fetchDocument();
+      }
     } finally {
       setDownloading(false);
     }

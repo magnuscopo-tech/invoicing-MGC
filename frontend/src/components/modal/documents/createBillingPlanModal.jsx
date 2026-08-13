@@ -10,6 +10,7 @@ import { GST_PERCENT } from "../../../constants/document.constants";
 import { isValidSplit } from "../../../constants/billing.constants";
 import { handleCreateBillingPlan } from "../../../Services/apiCalling/billingPlanApis";
 import { handleGetNextNumber } from "../../../Services/apiCalling/documentApis";
+import { itemsOf } from "../../../Utlis/Common/commonMethod";
 import { SuccessMessage } from "../../../Utlis/Toastify/ToastMessage";
 
 const DEFAULT_SPLIT = [
@@ -55,7 +56,8 @@ export default function CreateBillingPlanModal({
     }
   }, [open, sourceDocument]);
 
-  const percents = installments.map((row) => row.percent);
+  const installmentRows = itemsOf(installments);
+  const percents = installmentRows.map((row) => row.percent);
   const canSave = isValidSplit(percents);
 
   const onCreate = async () => {
@@ -63,7 +65,7 @@ export default function CreateBillingPlanModal({
     try {
       const payload = {
         sourceDocument: sourceDocument._id,
-        installments: installments.map((row) => ({
+        installments: installmentRows.map((row) => ({
           percent: Number(row.percent),
           label: (row.label || "").trim(),
         })),

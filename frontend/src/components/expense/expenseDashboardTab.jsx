@@ -11,7 +11,7 @@ import {
 } from "../../constants/chart.constants";
 import { formatCurrency, formatCompactCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
-import { truncate } from "../../Utlis/Common/commonMethod";
+import { itemsOf, truncate } from "../../Utlis/Common/commonMethod";
 
 /*
  * Ranked magnitude, so the fill is a single-hue ramp - darker means more. The
@@ -40,8 +40,9 @@ export default function ExpenseDashboardTab({
   parties,
   paymentModes = [],
 }) {
-  const trendRows = trend?.series || [];
-  const dailyRows = daily?.series || [];
+  const trendRows = itemsOf(trend?.series);
+  const dailyRows = itemsOf(daily?.series);
+  const paymentModeRows = itemsOf(paymentModes);
 
   // Three series is the cap this palette is validated for, and it is exactly
   // what the question needs: what came in, what went out, and the gap.
@@ -60,8 +61,10 @@ export default function ExpenseDashboardTab({
     },
   ];
 
-  const expenseRows = categories?.expense || [];
-  const incomeRows = categories?.income || [];
+  const expenseRows = itemsOf(categories?.expense);
+  const incomeRows = itemsOf(categories?.income);
+  const vendorRows = itemsOf(parties?.vendors);
+  const payerRows = itemsOf(parties?.payers);
 
   const expenseBars = expenseRows.slice(0, 10).map((row, index) => ({
     key: row.category,
@@ -79,7 +82,7 @@ export default function ExpenseDashboardTab({
     color: rampFor(index, Math.min(10, incomeRows.length)),
   }));
 
-  const vendorBars = (parties?.vendors || []).map((row, index, all) => ({
+  const vendorBars = vendorRows.map((row, index, all) => ({
     key: `vendor-${row.party}`,
     label: truncate(row.party, 34),
     value: row.paid,
@@ -87,7 +90,7 @@ export default function ExpenseDashboardTab({
     color: rampFor(index, all.length),
   }));
 
-  const payerBars = (parties?.payers || []).map((row, index, all) => ({
+  const payerBars = payerRows.map((row, index, all) => ({
     key: `payer-${row.party}`,
     label: truncate(row.party, 34),
     value: row.received,
@@ -95,7 +98,7 @@ export default function ExpenseDashboardTab({
     color: rampFor(index, all.length),
   }));
 
-  const modeBars = paymentModes.map((row, index, all) => ({
+  const modeBars = paymentModeRows.map((row, index, all) => ({
     key: row.mode,
     label: row.mode,
     value: row.total,
@@ -119,8 +122,11 @@ export default function ExpenseDashboardTab({
     },
   ];
 
-  const spend = summary?.spend;
-  const balance = summary?.balance;
+  const spend = summary?.spend || null;
+  const balance = summary?.balance || {};
+  const coverage = summary?.coverage || {};
+  const moneyIn = summary?.moneyIn || 0;
+  const moneyOut = summary?.moneyOut || 0;
 
   return (
     <div className="space-y-5">
@@ -335,13 +341,13 @@ export default function ExpenseDashboardTab({
                 <MeterBar
                   label="Share of receipts spent"
                   percent={
-                    summary.moneyIn
-                      ? Math.min(100, (summary.moneyOut / summary.moneyIn) * 100)
+                    moneyIn
+                      ? Math.min(100, (moneyOut / moneyIn) * 100)
                       : 0
                   }
                   caption={
-                    summary.moneyIn
-                      ? `${formatCurrency(summary.moneyOut)} paid out against ${formatCurrency(summary.moneyIn)} received.`
+                    moneyIn
+                      ? `${formatCurrency(moneyOut)} paid out against ${formatCurrency(moneyIn)} received.`
                       : "Nothing was received in this period."
                   }
                   color={CASHFLOW_COLORS.moneyOut}
@@ -381,8 +387,8 @@ export default function ExpenseDashboardTab({
                   </dd>
                   <p className="mt-0.5 text-[11px] text-ink-400">
                     Spend per 30 days across{" "}
-                    {summary?.coverage?.days || 0} day
-                    {summary?.coverage?.days === 1 ? "" : "s"} of data
+                    {coverage.days || 0} day
+                    {coverage.days === 1 ? "" : "s"} of data
                   </p>
                 </div>
                 <div>
@@ -468,7 +474,7 @@ export default function ExpenseDashboardTab({
                   render: (row) => formatDisplayDate(row.lastDate),
                 },
               ]}
-              rows={(parties?.vendors || []).map((row) => ({
+              rows={vendorRows.map((row) => ({
                 ...row,
                 id: row.party,
               }))}
@@ -508,7 +514,7 @@ export default function ExpenseDashboardTab({
                   render: (row) => formatDisplayDate(row.lastDate),
                 },
               ]}
-              rows={(parties?.payers || []).map((row) => ({
+              rows={payerRows.map((row) => ({
                 ...row,
                 id: row.party,
               }))}
@@ -551,7 +557,7 @@ export default function ExpenseDashboardTab({
                 render: (row) => formatCurrency(row.total),
               },
             ]}
-            rows={paymentModes.map((row) => ({ ...row, id: row.mode }))}
+            rows={paymentModeRows.map((row) => ({ ...row, id: row.mode }))}
           />
         }
       >

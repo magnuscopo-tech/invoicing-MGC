@@ -1,3 +1,5 @@
+import { itemsOf } from "../../Utlis/Common/commonMethod";
+
 // Generic table used for every report's table view and for the ledger screens.
 export default function DataTable({
   columns = [],
@@ -6,7 +8,10 @@ export default function DataTable({
   emptyLabel = "No rows to show.",
   onRowClick = null,
 }) {
-  if (rows.length === 0) {
+  const columnList = itemsOf(columns);
+  const rowList = itemsOf(rows);
+
+  if (rowList.length === 0) {
     return <p className="py-10 text-center text-sm text-ink-400">{emptyLabel}</p>;
   }
 
@@ -15,7 +20,7 @@ export default function DataTable({
       <table className="w-full min-w-[560px]">
         <thead className="bg-ink-50">
           <tr>
-            {columns.map((column) => (
+            {columnList.map((column) => (
               <th
                 key={column.key}
                 className={`table-head ${column.align === "right" ? "text-right" : ""}`}
@@ -27,7 +32,7 @@ export default function DataTable({
         </thead>
 
         <tbody className="divide-y divide-ink-100">
-          {rows.map((row, rowIndex) => (
+          {rowList.map((row, rowIndex) => (
             <tr
               key={row.id ?? rowIndex}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
@@ -35,7 +40,7 @@ export default function DataTable({
                 onRowClick ? "cursor-pointer hover:bg-primary-50/40" : ""
               }`}
             >
-              {columns.map((column) => (
+              {columnList.map((column) => (
                 <td
                   key={column.key}
                   className={`table-cell ${

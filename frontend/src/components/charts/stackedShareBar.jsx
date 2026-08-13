@@ -1,5 +1,6 @@
 import ChartLegend from "./chartLegend";
 import { formatCompactCurrency } from "../../Utlis/currencyFormat";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 
 /*
  * Part-to-whole across one bar. Segments are separated by a 2px surface gap so
@@ -10,13 +11,17 @@ export default function StackedShareBar({
   formatValue = formatCompactCurrency,
   emptyLabel = "Nothing to show yet.",
 }) {
-  const total = segments.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+  const segmentList = itemsOf(segments);
+  const total = segmentList.reduce(
+    (sum, item) => sum + (Number(item.value) || 0),
+    0
+  );
 
   if (!total) {
     return <p className="py-10 text-center text-sm text-ink-400">{emptyLabel}</p>;
   }
 
-  const visible = segments.filter((item) => Number(item.value) > 0);
+  const visible = segmentList.filter((item) => Number(item.value) > 0);
 
   return (
     <div>

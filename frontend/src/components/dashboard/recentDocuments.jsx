@@ -6,6 +6,7 @@ import {
   DOC_STATUS_TONE,
   DOC_TYPE_TONE,
 } from "../../constants/document.constants";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { relativeFromNow } from "../../Utlis/dateFormat";
 
@@ -14,6 +15,8 @@ export default function RecentDocuments({
   onOpen = () => {},
   onSeeAll = () => {},
 }) {
+  const documentList = itemsOf(documents);
+
   return (
     <section className="card animate-fade-up overflow-hidden">
       <header className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
@@ -29,7 +32,7 @@ export default function RecentDocuments({
         </button>
       </header>
 
-      {documents.length === 0 ? (
+      {documentList.length === 0 ? (
         <EmptyState
           icon={FileText}
           title="Nothing issued yet"
@@ -37,7 +40,7 @@ export default function RecentDocuments({
         />
       ) : (
         <ul className="divide-y divide-ink-100">
-          {documents.map((document, index) => (
+          {documentList.map((document, index) => (
             <li key={document._id}>
               <button
                 type="button"

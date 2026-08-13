@@ -6,14 +6,16 @@ import {
 } from "../../constants/document.constants";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
-import { classNames } from "../../Utlis/Common/commonMethod";
+import { classNames, itemsOf } from "../../Utlis/Common/commonMethod";
 
 export default function ChainView({
   chain = [],
   currentId = "",
   onSelect = () => {},
 }) {
-  if (chain.length <= 1) return null;
+  const chainList = itemsOf(chain);
+
+  if (chainList.length <= 1) return null;
 
   return (
     <section className="card animate-fade-up p-5">
@@ -22,7 +24,7 @@ export default function ChainView({
       </h2>
 
       <ol className="mt-4 space-y-2">
-        {chain.map((node, index) => {
+        {chainList.map((node, index) => {
           const isCurrent = node._id === currentId;
 
           return (

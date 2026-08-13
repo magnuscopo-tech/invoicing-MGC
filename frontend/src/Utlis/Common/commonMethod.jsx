@@ -48,6 +48,13 @@ export const compactPayload = (payload) =>
     return accumulator;
   }, {});
 
+export const itemsOf = (value) => {
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.items)) return value.items;
+  if (Array.isArray(value?.data)) return value.data;
+  return [];
+};
+
 export const downloadBlobAsFile = (blob, fileName) => {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

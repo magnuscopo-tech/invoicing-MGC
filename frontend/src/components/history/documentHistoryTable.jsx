@@ -5,6 +5,7 @@ import {
   DOC_STATUS_TONE,
   DOC_TYPE_TONE,
 } from "../../constants/document.constants";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
 
@@ -14,6 +15,8 @@ export default function DocumentHistoryTable({
   onPreview = () => {},
   onDownload = () => {},
 }) {
+  const documentList = itemsOf(documents);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[900px]">
@@ -30,7 +33,7 @@ export default function DocumentHistoryTable({
         </thead>
 
         <tbody className="divide-y divide-ink-100">
-          {documents.map((document, index) => (
+          {documentList.map((document, index) => (
             <tr
               key={document._id}
               onClick={() => onOpen(document)}

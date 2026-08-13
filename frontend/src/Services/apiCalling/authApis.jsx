@@ -8,6 +8,7 @@ import {
   GetAllUsersApi,
   UpdateUserStatusApi,
 } from "../apiMethod";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 
 // The backend returns the token on the top level, so auth handlers shape it
 // into { token, user } instead of returning raw.data alone.
@@ -93,8 +94,9 @@ const handleGetAllUsers = async (params = { page: 1, limit: 20 }) => {
   try {
     const response = await GetAllUsersApi(params);
     if (response.statusCode === 200) {
+      const items = itemsOf(response.raw.data);
       return {
-        items: response.raw.data || [],
+        items,
         total: response.raw.total || 0,
         page: response.raw.page || 1,
         limit: response.raw.limit || 20,

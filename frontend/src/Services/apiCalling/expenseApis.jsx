@@ -17,6 +17,7 @@ import {
   GetPaymentModeSplitApi,
   GetDailyCashFlowApi,
 } from "../apiMethod";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 
 /* --------------------------------- Ledger --------------------------------- */
 
@@ -26,8 +27,9 @@ const handleGetAllTransactions = async (params = { page: 1, limit: 25 }) => {
   try {
     const response = await GetAllTransactionsApi(params);
     if (response.statusCode === 200) {
+      const items = itemsOf(response.raw.data);
       return {
-        items: response.raw.data || [],
+        items,
         total: response.raw.total || 0,
         page: response.raw.page || 1,
         limit: response.raw.limit || 25,
@@ -128,7 +130,7 @@ const handleBulkUploadStatement = async (formData) => {
       return {
         batch: response.raw.data?.batch || null,
         needsReview: response.raw.data?.needsReview || 0,
-        errors: response.raw.data?.errors || [],
+        errors: itemsOf(response.raw.data?.errors),
         message: response.message,
       };
     }
@@ -143,8 +145,9 @@ const handleGetImportBatches = async (params = { page: 1, limit: 20 }) => {
   try {
     const response = await GetImportBatchesApi(params);
     if (response.statusCode === 200) {
+      const items = itemsOf(response.raw.data);
       return {
-        items: response.raw.data || [],
+        items,
         total: response.raw.total || 0,
         page: response.raw.page || 1,
         limit: response.raw.limit || 20,
@@ -256,7 +259,7 @@ const handleGetPaymentModeSplit = async (params) => {
   try {
     const response = await GetPaymentModeSplitApi(params);
     if (response.statusCode === 200) {
-      return response.raw.data || [];
+      return itemsOf(response.raw.data);
     }
     return null;
   } catch (error) {

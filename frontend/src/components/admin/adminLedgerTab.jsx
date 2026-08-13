@@ -9,6 +9,7 @@ import TableLoader from "../loader/tableLoader";
 import StatusBadge from "../custom/statusBadge";
 import useDebounce from "../../hooks/useDebounce";
 import { handleGetDocumentLedger } from "../../Services/apiCalling/reportApis";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
 import {
@@ -59,6 +60,7 @@ export default function AdminLedgerTab({ scope }) {
   }, [debouncedSearch, docType, status, scope]);
 
   const totals = ledger?.totals || { subTotal: 0, gstAmount: 0, totalAmount: 0 };
+  const rows = itemsOf(ledger?.items);
 
   return (
     <ReportCard
@@ -167,7 +169,7 @@ export default function AdminLedgerTab({ scope }) {
                 ),
               },
             ]}
-            rows={(ledger?.items || []).map((row) => ({ ...row, id: row._id }))}
+            rows={rows.map((row) => ({ ...row, id: row._id }))}
             footer={
               <tr>
                 <td className="table-cell font-semibold text-ink-700" colSpan={3}>

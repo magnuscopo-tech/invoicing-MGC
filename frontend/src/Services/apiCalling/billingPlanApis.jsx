@@ -10,13 +10,15 @@ import {
   CloseBillingPlanEarlyApi,
   CancelBillingPlanApi,
 } from "../apiMethod";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 
 const handleGetAllBillingPlans = async (params = { page: 1, limit: 20 }) => {
   try {
     const response = await GetAllBillingPlansApi(params);
     if (response.statusCode === 200) {
+      const items = itemsOf(response.raw.data);
       return {
-        items: response.raw.data || [],
+        items,
         total: response.raw.total || 0,
         page: response.raw.page || 1,
         limit: response.raw.limit || 20,

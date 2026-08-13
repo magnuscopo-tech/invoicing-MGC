@@ -25,7 +25,11 @@ import {
 } from "../../Services/apiCalling/expenseApis";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate, formatDisplayDateTime } from "../../Utlis/dateFormat";
-import { downloadBlobAsFile, classNames } from "../../Utlis/Common/commonMethod";
+import {
+  classNames,
+  downloadBlobAsFile,
+  itemsOf,
+} from "../../Utlis/Common/commonMethod";
 import { SuccessMessage, ErrorMessage } from "../../Utlis/Toastify/ToastMessage";
 import {
   EXPENSE_MESSAGES,
@@ -74,6 +78,8 @@ export default function ExpenseImportTab({ onImported = () => {} }) {
   const [page, setPage] = useState(1);
   const [revertTarget, setRevertTarget] = useState(null);
   const [reverting, setReverting] = useState(false);
+  const receiptErrors = itemsOf(receipt?.errors);
+  const batchRows = itemsOf(batches?.items);
 
   const fetchBatches = useCallback(async () => {
     setLoadingBatches(true);
@@ -321,14 +327,14 @@ export default function ExpenseImportTab({ onImported = () => {} }) {
                     ` · closing balance ${formatCurrency(receipt.batch.closingBalance)}`}
                 </p>
 
-                {receipt.errors?.length > 0 && (
+                {receiptErrors.length > 0 && (
                   <details className="mt-3">
                     <summary className="cursor-pointer text-[12px] font-semibold text-amber-700">
-                      {receipt.errors.length} row
-                      {receipt.errors.length === 1 ? "" : "s"} need attention
+                      {receiptErrors.length} row
+                      {receiptErrors.length === 1 ? "" : "s"} need attention
                     </summary>
                     <ul className="mt-2 space-y-1">
-                      {receipt.errors.map((item, index) => (
+                      {receiptErrors.map((item, index) => (
                         <li
                           key={`${item.row}-${index}`}
                           className="text-[12px] leading-relaxed text-ink-600"
@@ -447,7 +453,7 @@ export default function ExpenseImportTab({ onImported = () => {} }) {
                   ),
                 },
               ]}
-              rows={(batches?.items || []).map((row) => ({ ...row, id: row._id }))}
+              rows={batchRows.map((row) => ({ ...row, id: row._id }))}
             />
 
             <Pagination

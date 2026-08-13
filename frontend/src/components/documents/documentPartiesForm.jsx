@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import SelectField from "../custom/selectField";
 import DatePickerField from "../custom/datePickerField";
 import TextAreaField from "../custom/textAreaField";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { ROUTES } from "../../constants/route.constants";
 import { DOC_TYPES } from "../../constants/document.constants";
 
@@ -43,6 +44,8 @@ export default function DocumentPartiesForm({
   onChange = () => {},
 }) {
   const isQuotation = formData.docType === DOC_TYPES.quotation;
+  const companyList = itemsOf(companies);
+  const clientList = itemsOf(clients);
   const clientMissingGstin =
     !isQuotation && selectedClient && !selectedClient.gstin;
 
@@ -67,7 +70,7 @@ export default function DocumentPartiesForm({
             placeholder="Select a company"
             value={formData.company}
             error={errors.company}
-            options={companies.map((company) => ({
+            options={companyList.map((company) => ({
               value: company._id,
               label: company.name,
             }))}
@@ -94,7 +97,7 @@ export default function DocumentPartiesForm({
             placeholder="Select a client"
             value={formData.client}
             error={errors.client}
-            options={clients.map((client) => ({
+            options={clientList.map((client) => ({
               value: client._id,
               label: client.name,
             }))}

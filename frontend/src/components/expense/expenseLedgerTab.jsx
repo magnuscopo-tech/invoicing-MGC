@@ -10,6 +10,7 @@ import ConfirmDialog from "../modal/confirmDialog";
 import TransactionModal from "../modal/expense/transactionModal";
 import { selectIsAdmin } from "../../ReduxFeature/Authenthicate/LoginSlice";
 import { handleDeleteTransaction } from "../../Services/apiCalling/expenseApis";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
 import { SuccessMessage } from "../../Utlis/Toastify/ToastMessage";
@@ -46,6 +47,7 @@ export default function ExpenseLedgerTab({
     totalDebit: 0,
     netFlow: 0,
   };
+  const rows = itemsOf(ledger?.items);
 
   const onDeleteConfirm = async () => {
     setDeleting(true);
@@ -206,7 +208,7 @@ export default function ExpenseLedgerTab({
                   ),
                 },
               ]}
-              rows={(ledger?.items || []).map((row) => ({ ...row, id: row._id }))}
+              rows={rows.map((row) => ({ ...row, id: row._id }))}
               footer={
                 <tr>
                   <td

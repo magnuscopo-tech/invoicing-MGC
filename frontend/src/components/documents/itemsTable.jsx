@@ -1,5 +1,6 @@
 import { ListPlus, Trash2 } from "lucide-react";
 import EmptyState from "../custom/emptyState";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { computeLineAmount } from "../../Utlis/calculations";
 
@@ -8,7 +9,9 @@ export default function ItemsTable({
   editable = true,
   onRemove = () => {},
 }) {
-  if (items.length === 0) {
+  const itemList = itemsOf(items);
+
+  if (itemList.length === 0) {
     return (
       <div className="rounded-2xl border border-ink-100">
         <EmptyState
@@ -36,7 +39,7 @@ export default function ItemsTable({
         </thead>
 
         <tbody className="divide-y divide-ink-100">
-          {items.map((item, index) => (
+          {itemList.map((item, index) => (
             <tr
               key={`${item.description}-${index}`}
               className="animate-fade-in transition-colors hover:bg-ink-50/60"

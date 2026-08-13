@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import useElementWidth from "../../hooks/useElementWidth";
 import ChartLegend from "./chartLegend";
 import { CHART_CHROME } from "../../constants/chart.constants";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCompactCurrency } from "../../Utlis/currencyFormat";
 
 const PADDING = { top: 16, bottom: 28, left: 56 };
@@ -31,15 +32,20 @@ export default function LineChart({
 }) {
   const [ref, width] = useElementWidth();
   const [activeIndex, setActiveIndex] = useState(null);
+  const seriesList = itemsOf(series).map((item) => ({
+    ...item,
+    values: itemsOf(item.values),
+  }));
+  const categoryList = itemsOf(categories);
 
-  const paddingRight = rightPaddingFor(series);
+  const paddingRight = rightPaddingFor(seriesList);
   const innerWidth = Math.max(80, width - PADDING.left - paddingRight);
   const innerHeight = height - PADDING.top - PADDING.bottom;
 
   const maxValue = useMemo(() => {
-    const values = series.flatMap((item) => item.values || []);
+    const values = seriesList.flatMap((item) => item.values);
     return niceCeiling(Math.max(0, ...values));
-  }, [series]);
+  }, [seriesList]);
 
   const ticks = useMemo(
     () => [0, 0.25, 0.5, 0.75, 1].map((step) => step * maxValue),
@@ -47,22 +53,25 @@ export default function LineChart({
   );
 
   const xAt = (index) =>
-    categories.length <= 1
+    categoryList.length <= 1
       ? PADDING.left + innerWidth / 2
-      : PADDING.left + (index / (categories.length - 1)) * innerWidth;
+      : PADDING.left + (index / (categoryList.length - 1)) * innerWidth;
 
   const yAt = (value) =>
     PADDING.top + innerHeight - (maxValue ? (value / maxValue) * innerHeight : 0);
 
   // Only label a subset of the x axis, so ticks never collide on narrow cards.
-  const labelStride = Math.max(1, Math.ceil(categories.length / (innerWidth / 56)));
+  const labelStride = Math.max(
+    1,
+    Math.ceil(categoryList.length / (innerWidth / 56))
+  );
 
   // Push end labels apart when their final values nearly coincide.
   const labelPositions = useMemo(() => {
-    const lastIndex = categories.length - 1;
+    const lastIndex = categoryList.length - 1;
     if (lastIndex < 0) return [];
 
-    const placed = series
+    const placed = seriesList
       .map((item) => {
         const value = item.values?.[lastIndex] || 0;
         const pointY =
@@ -79,17 +88,17 @@ export default function LineChart({
       previousY = y;
       return { ...item, y };
     });
-  }, [series, categories.length, innerHeight, maxValue]);
+  }, [seriesList, categoryList.length, innerHeight, maxValue]);
 
   const onPointerMove = (event) => {
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - bounds.left - PADDING.left;
     const ratio = innerWidth ? x / innerWidth : 0;
-    const index = Math.round(ratio * (categories.length - 1));
-    setActiveIndex(Math.min(categories.length - 1, Math.max(0, index)));
+    const index = Math.round(ratio * (categoryList.length - 1));
+    setActiveIndex(Math.min(categoryList.length - 1, Math.max(0, index)));
   };
 
-  if (categories.length === 0) {
+  if (categoryList.length === 0) {
     return (
       <p className="py-12 text-center text-sm text-ink-400">
         No data in this period.
@@ -99,7 +108,7 @@ export default function LineChart({
 
   return (
     <div ref={ref} className="w-full">
-      <ChartLegend series={series} className="mb-3" />
+      <ChartLegend series={seriesList} className="mb-3" />
 
       <div className="relative">
         <svg
@@ -133,11 +142,11 @@ export default function LineChart({
             </g>
           ))}
 
-          {categories.map((label, index) => {
+          {categoryList.map((label, index) => {
             if (index % labelStride !== 0) return null;
             // Anchor the edge labels inward so they never clip the plot area.
             const isFirst = index === 0;
-            const isLast = index === categories.length - 1;
+            const isLast = index === categoryList.length - 1;
 
             return (
               <text
@@ -165,8 +174,8 @@ export default function LineChart({
             />
           )}
 
-          {series.map((item) => {
-            const path = (item.values || [])
+          {seriesList.map((item) => {
+            const path = item.values
               .map(
                 (value, index) =>
                   `${index === 0 ? "M" : "L"} ${xAt(index)} ${yAt(value)}`
@@ -191,7 +200,7 @@ export default function LineChart({
           {labelPositions.map((label) => (
             <g key={`label-${label.key}`}>
               <circle
-                cx={xAt(categories.length - 1)}
+                cx={xAt(categoryList.length - 1)}
                 cy={label.pointY}
                 r="3.5"
                 fill={label.color}
@@ -199,7 +208,7 @@ export default function LineChart({
                 strokeWidth="2"
               />
               <text
-                x={xAt(categories.length - 1) + 8}
+                x={xAt(categoryList.length - 1) + 8}
                 y={label.y + 4}
                 fill={CHART_CHROME.muted}
                 fontSize="11"
@@ -211,7 +220,7 @@ export default function LineChart({
           ))}
 
           {activeIndex !== null &&
-            series.map((item) => (
+            seriesList.map((item) => (
               <circle
                 key={item.key}
                 cx={xAt(activeIndex)}
@@ -236,10 +245,10 @@ export default function LineChart({
             }}
           >
             <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-400">
-              {categories[activeIndex]}
+              {categoryList[activeIndex]}
             </p>
             <ul className="space-y-1">
-              {series.map((item) => (
+              {seriesList.map((item) => (
                 <li
                   key={item.key}
                   className="flex items-center justify-between gap-4"

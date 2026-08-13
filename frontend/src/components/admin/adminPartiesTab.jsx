@@ -4,7 +4,7 @@ import HorizontalBars from "../charts/horizontalBars";
 import { ORDINAL_5 } from "../../constants/chart.constants";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
-import { truncate } from "../../Utlis/Common/commonMethod";
+import { itemsOf, truncate } from "../../Utlis/Common/commonMethod";
 
 // Magnitude ranking, so the fill is a single-hue ramp - darker means more, and
 // the colour never claims the rows are different kinds of thing.
@@ -17,12 +17,14 @@ const rampFor = (index, count) =>
   ];
 
 export default function AdminPartiesTab({ topClients = [], companyPerformance = [] }) {
-  const clientBars = topClients.map((client, index) => ({
+  const clientRows = itemsOf(topClients);
+  const companyRows = itemsOf(companyPerformance);
+  const clientBars = clientRows.map((client, index) => ({
     key: client.clientId,
     label: truncate(client.name, 34),
     value: client.invoiced,
     caption: `${client.invoiceCount} inv`,
-    color: rampFor(index, topClients.length),
+    color: rampFor(index, clientRows.length),
   }));
 
   return (
@@ -59,7 +61,7 @@ export default function AdminPartiesTab({ topClients = [], companyPerformance = 
                 render: (row) => formatDisplayDate(row.lastIssueDate),
               },
             ]}
-            rows={topClients.map((row) => ({ ...row, id: row.clientId }))}
+            rows={clientRows.map((row) => ({ ...row, id: row.clientId }))}
           />
         }
       >
@@ -113,7 +115,7 @@ export default function AdminPartiesTab({ topClients = [], companyPerformance = 
               render: (row) => formatCurrency(row.outstanding),
             },
           ]}
-          rows={companyPerformance.map((row) => ({ ...row, id: row.companyId }))}
+          rows={companyRows.map((row) => ({ ...row, id: row.companyId }))}
         />
       </ReportCard>
     </div>

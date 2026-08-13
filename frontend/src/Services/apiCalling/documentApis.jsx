@@ -4,7 +4,6 @@ import {
   GetDocumentDetailApi,
   GetDocumentChainApi,
   PreviewDocumentHtmlApi,
-  DownloadDocumentApi,
   CreateDocumentApi,
   ConvertDocumentApi,
   UpdateDocumentApi,
@@ -14,6 +13,8 @@ import {
   ApproveDocumentApi,
   RejectDocumentApi,
 } from "../apiMethod";
+import { itemsOf, safeFileName } from "../../Utlis/Common/commonMethod";
+import { printHtmlAsPdf } from "../../Utlis/Common/documentPdfPrint";
 
 const handleGetNextNumber = async (type, companyId, date) => {
   try {
@@ -32,8 +33,9 @@ const handleGetAllDocuments = async (params = { page: 1, limit: 20 }) => {
   try {
     const response = await GetAllDocumentsApi(params);
     if (response.statusCode === 200) {
+      const items = itemsOf(response.raw.data);
       return {
-        items: response.raw.data || [],
+        items,
         total: response.raw.total || 0,
         page: response.raw.page || 1,
         limit: response.raw.limit || 20,
@@ -86,16 +88,13 @@ const handlePreviewDocumentHtml = async (id) => {
   }
 };
 
-const handleDownloadDocument = async (id) => {
+const handleDownloadDocument = async (id, docNumber = "document") => {
   try {
-    const response = await DownloadDocumentApi(id);
-    if (response.statusCode === 200) {
-      return response.raw.data;
-    }
-    return null;
+    const html = await handlePreviewDocumentHtml(id);
+    return printHtmlAsPdf(html, safeFileName(docNumber));
   } catch (error) {
     console.error("Error downloading document:", error);
-    return null;
+    return false;
   }
 };
 

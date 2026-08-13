@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import SelectField from "../custom/selectField";
 import InputField from "../custom/inputField";
 import CustomButton from "../custom/customButton";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { computeLineAmount } from "../../Utlis/calculations";
 import { commonValidator } from "../../Utlis/Common/commonValidator";
@@ -19,6 +20,7 @@ const EMPTY_LINE = {
 export default function ItemBuilder({ services = [], onAdd = () => {} }) {
   const [line, setLine] = useState(EMPTY_LINE);
   const [errors, setErrors] = useState({});
+  const serviceList = itemsOf(services);
 
   const onFieldChange = (value, field) => {
     setLine((previous) => ({ ...previous, [field]: value }));
@@ -27,7 +29,7 @@ export default function ItemBuilder({ services = [], onAdd = () => {} }) {
 
   // Picking a catalog service seeds description, price and unit — all editable.
   const onServiceChange = (serviceId) => {
-    const service = services.find((item) => item._id === serviceId);
+    const service = serviceList.find((item) => item._id === serviceId);
 
     setLine((previous) => ({
       ...previous,
@@ -97,7 +99,7 @@ export default function ItemBuilder({ services = [], onAdd = () => {} }) {
           name="serviceRef"
           placeholder="Custom line item"
           value={line.serviceRef}
-          options={services.map((service) => ({
+          options={serviceList.map((service) => ({
             value: service._id,
             label: service.name,
           }))}

@@ -5,13 +5,15 @@ import {
   UpdateServiceApi,
   DeleteServiceApi,
 } from "../apiMethod";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 
 const handleGetAllServices = async (params = { page: 1, limit: 50 }) => {
   try {
     const response = await GetAllServicesApi(params);
     if (response.statusCode === 200) {
+      const items = itemsOf(response.raw.data);
       return {
-        items: response.raw.data || [],
+        items,
         total: response.raw.total || 0,
         page: response.raw.page || 1,
         limit: response.raw.limit || 50,

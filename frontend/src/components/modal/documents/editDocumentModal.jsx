@@ -14,6 +14,7 @@ import {
   SuccessMessage,
 } from "../../../Utlis/Toastify/ToastMessage";
 import { isDueDateValid } from "../../../Utlis/Common/commonValidator";
+import { itemsOf } from "../../../Utlis/Common/commonMethod";
 import { toInputDate } from "../../../Utlis/dateFormat";
 import { computeTotals } from "../../../Utlis/calculations";
 import { DOC_TYPES, isPriceLocked } from "../../../constants/document.constants";
@@ -23,7 +24,7 @@ import { MESSAGES } from "../../../constants/message.constants";
 // difference coming back from the server never looks like a re-price.
 const toComparableItems = (items = []) =>
   JSON.stringify(
-    items.map((item) => ({
+    itemsOf(items).map((item) => ({
       description: String(item.description || "").trim(),
       unit: item.unit || "unit",
       qty: Number(item.qty) || 0,
@@ -64,7 +65,7 @@ export default function EditDocumentModal({
     setDueDate(toInputDate(currentDocument.dueDate));
     setIntroLine(currentDocument.introLine || "");
     setNotesTerms(currentDocument.notesTerms || "");
-    setItems(currentDocument.items || []);
+    setItems(itemsOf(currentDocument.items));
     setErrors({});
   }, [open, currentDocument]);
 
@@ -78,7 +79,7 @@ export default function EditDocumentModal({
         limit: 200,
         isActive: true,
       });
-      setServices(result?.items || []);
+      setServices(itemsOf(result?.items));
     };
 
     fetchServices();
@@ -93,7 +94,7 @@ export default function EditDocumentModal({
     if (!currentDocument) return false;
     return (
       toComparableItems(items) !==
-      toComparableItems(currentDocument.items || [])
+      toComparableItems(currentDocument.items)
     );
   }, [items, currentDocument]);
 
@@ -102,7 +103,7 @@ export default function EditDocumentModal({
       setErrors({ dueDate: `${dueDateLabel} cannot be before the issue date.` });
       return;
     }
-    if (canReprice && items.length === 0) {
+    if (canReprice && itemsOf(items).length === 0) {
       ErrorMessage("A document needs at least one line item.");
       return;
     }
@@ -117,7 +118,7 @@ export default function EditDocumentModal({
       // Items go up only when they actually moved — an untouched save should not
       // read as a re-price in the audit trail.
       if (canReprice && itemsChanged) {
-        payload.items = items.map((item) => ({
+        payload.items = itemsOf(items).map((item) => ({
           serviceRef: item.serviceRef || undefined,
           description: item.description,
           unit: item.unit || "unit",

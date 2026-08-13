@@ -6,6 +6,7 @@ import {
   DOC_LABELS,
   DOC_TYPE_TONE,
 } from "../../constants/document.constants";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { formatCurrency } from "../../Utlis/currencyFormat";
 import { formatDisplayDate, relativeFromNow } from "../../Utlis/dateFormat";
 
@@ -22,7 +23,9 @@ export default function ApprovalsTable({
   onApprove = () => {},
   onReject = () => {},
 }) {
-  if (documents.length === 0) {
+  const documentList = itemsOf(documents);
+
+  if (documentList.length === 0) {
     return (
       <EmptyState
         icon={emptyIcon}
@@ -55,7 +58,7 @@ export default function ApprovalsTable({
         </thead>
 
         <tbody className="divide-y divide-ink-100">
-          {documents.map((document, index) => (
+          {documentList.map((document, index) => (
             <tr
               key={document._id}
               onClick={() => onOpen(document)}

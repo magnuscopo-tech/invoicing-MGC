@@ -18,6 +18,12 @@ const TONES = {
   danger: "bg-red-50 text-red-600",
 };
 
+const EMPTY_BALANCE = {
+  closing: null,
+  asOf: null,
+  bankAccount: "",
+};
+
 /*
  * Four headline numbers, so these are stat tiles rather than a chart. The delta
  * is only rendered when the API actually supplied a comparison window - an
@@ -77,10 +83,13 @@ const Tile = ({
 );
 
 export default function ExpenseKpiRow({ summary }) {
-  if (!summary) return null;
-
-  const { moneyIn, moneyOut, netFlow, balance, comparison, creditCount, debitCount } =
-    summary;
+  const moneyIn = summary?.moneyIn || 0;
+  const moneyOut = summary?.moneyOut || 0;
+  const netFlow = summary?.netFlow || 0;
+  const balance = summary?.balance || EMPTY_BALANCE;
+  const comparison = summary?.comparison || {};
+  const creditCount = summary?.creditCount || 0;
+  const debitCount = summary?.debitCount || 0;
 
   const isSurplus = netFlow >= 0;
 

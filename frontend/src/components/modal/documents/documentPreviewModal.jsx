@@ -6,10 +6,6 @@ import {
   handleDownloadDocument,
   handlePreviewDocumentHtml,
 } from "../../../Services/apiCalling/documentApis";
-import {
-  downloadBlobAsFile,
-  safeFileName,
-} from "../../../Utlis/Common/commonMethod";
 
 export default function DocumentPreviewModal({
   open,
@@ -44,8 +40,7 @@ export default function DocumentPreviewModal({
   const onDownload = async () => {
     setDownloading(true);
     try {
-      const blob = await handleDownloadDocument(documentId);
-      if (blob) downloadBlobAsFile(blob, safeFileName(docNumber));
+      await handleDownloadDocument(documentId, docNumber);
     } finally {
       setDownloading(false);
     }

@@ -17,6 +17,7 @@ import {
   handleDeleteCompany,
   handleGetAllCompanies,
 } from "../../Services/apiCalling/companyApis";
+import { itemsOf } from "../../Utlis/Common/commonMethod";
 import { SuccessMessage } from "../../Utlis/Toastify/ToastMessage";
 
 const LIMIT = 12;
@@ -47,7 +48,7 @@ export default function Company() {
       if (debouncedSearch) params.search = debouncedSearch;
 
       const response = await handleGetAllCompanies(params);
-      setCompanies(response?.items || []);
+      setCompanies(itemsOf(response?.items));
       setTotal(response?.total || 0);
     } finally {
       setLoading(false);
@@ -102,7 +103,7 @@ export default function Company() {
 
       {loading ? (
         <CardGridLoader count={6} />
-      ) : companies.length === 0 ? (
+      ) : itemsOf(companies).length === 0 ? (
         <div className="card">
           <EmptyState
             icon={Building2}
@@ -122,7 +123,7 @@ export default function Company() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {companies.map((company) => (
+            {itemsOf(companies).map((company) => (
               <CompanyCard
                 key={company._id}
                 company={company}
