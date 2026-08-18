@@ -25,7 +25,6 @@
       {{#if dueDateFormatted}}
         <div class="doc-meta-row"><span class="k">{{dueDateLabel}}</span>{{dueDateFormatted}}</div>
       {{/if}}
-      <div class="doc-meta-row"><span class="k">Place of Supply</span>{{placeOfSupply}}</div>
     </div>
   </div>
 </header>
@@ -38,8 +37,10 @@
     <div class="party-tax">
       <span>GSTIN</span> {{company.gstin}}
       {{#if company.pan}}&nbsp;&nbsp;<span>PAN</span> {{company.pan}}{{/if}}
-      {{#if company.stateCode}}&nbsp;&nbsp;<span>State Code</span> {{company.stateCode}}{{/if}}
     </div>
+    {{#if company.stateCode}}
+      <div class="party-tax"><span>State Code</span> {{company.stateCode}}</div>
+    {{/if}}
   </div>
 
   <div class="party">
