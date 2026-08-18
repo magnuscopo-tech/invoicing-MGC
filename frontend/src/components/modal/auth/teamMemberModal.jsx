@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ShieldAlert } from "lucide-react";
+import { Eye, EyeOff, ShieldAlert } from "lucide-react";
 import BaseModal from "../baseModal";
 import InputField from "../../custom/inputField";
 import SelectField from "../../custom/selectField";
@@ -23,12 +23,14 @@ export default function TeamMemberModal({
 }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
       setFormData(EMPTY_FORM);
       setErrors({});
+      setShowPassword(false);
     }
   }, [open]);
 
@@ -114,12 +116,23 @@ export default function TeamMemberModal({
         <InputField
           label="Temporary password"
           name="password"
-          type="password"
+          type={showPassword ? "text" : "password"}
           required
           hint="At least 8 characters. Ask them to change it after first sign-in."
           value={formData.password}
           error={errors.password}
           onChange={onFieldChange}
+          suffix={
+            <button
+              type="button"
+              className="rounded-md p-1.5 text-ink-400 transition hover:bg-ink-100 hover:text-ink-700"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              title={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+            </button>
+          }
         />
         <SelectField
           label="Role"

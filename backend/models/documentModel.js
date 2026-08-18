@@ -44,7 +44,7 @@ const documentSchema = new mongoose.Schema(
     docType: { type: String, enum: DOC_TYPES, required: true },
     // Header title: "Quotation" | "Proforma Invoice" | "Tax Invoice"
     docLabel: { type: String, required: true },
-    // Not globally unique - a proforma and the invoice made from it share one number.
+    // Not globally unique across document types.
     docNumber: { type: String, required: true },
     // "2026" for quotations (calendar year), "26-27" for proforma/invoice (FY).
     financialYearOrYear: { type: String, required: true },
@@ -152,7 +152,7 @@ const documentSchema = new mongoose.Schema(
 documentSchema.index({ client: 1, createdAt: -1 });
 documentSchema.index({ company: 1, docType: 1 });
 documentSchema.index({ issueDate: -1 });
-// Proforma and Invoice intentionally share a docNumber, so uniqueness is on the pair.
+// Document numbers are unique within their own type.
 // Split proformas differ by their letter suffix (…/003-A, …/003-B), so they sit in
 // this index alongside the bare number their closing tax invoice takes.
 documentSchema.index({ docNumber: 1, docType: 1 }, { unique: true });

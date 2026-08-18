@@ -13,11 +13,18 @@ const {
 const BillingPlan = require("../models/billingPlanModel");
 const { computeTotals } = require("./calculationService");
 const { closePlanOnInvoiceApproval } = require("./billingPlanService");
-const { peekNextNumber, commitNextNumber } = require("./numberingService");
+const {
+  peekNextNumber,
+  commitNextNumber,
+  commitSerialNumber,
+  getYearKey,
+  buildDocNumber,
+} = require("./numberingService");
 const { renderHtml, renderPdfBuffer } = require("./pdfService");
 const { recordAudit } = require("./auditLogService");
 const { mapDocumentListItem, mapDocumentDetail } = require("../responses/documentResponse");
 const { sanitizeFileName } = require("../utils/fileHelper");
+const { compressImageToDataUrl } = require("../utils/imageAssetHelper");
 
 const COMPANY_LIST_FIELDS = "name gstin";
 const CLIENT_LIST_FIELDS = "name gstin";
@@ -123,7 +130,28 @@ const fetchCreateDocument = async (req, res) => {
     // Client-supplied totals are ignored - everything money related is recomputed here.
     const totals = computeTotals(req.body.items, gstApplicable);
 
-    const numbering = await commitNextNumber(docType, companyId, issueDate);
+    const requestedSerialNumber = req.body.serialNumber
+      ? Number(req.body.serialNumber)
+      : null;
+
+    if (requestedSerialNumber) {
+      const yearKey = getYearKey(docType, issueDate);
+      const docNumber = buildDocNumber(docType, yearKey, requestedSerialNumber);
+      const existing = await Document.findOne({ docType, docNumber })
+        .select("_id")
+        .lean();
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          message: `Document number ${docNumber} already exists`,
+          statusCode: 409,
+        });
+      }
+    }
+
+    const numbering = requestedSerialNumber
+      ? await commitSerialNumber(docType, companyId, issueDate, requestedSerialNumber)
+      : await commitNextNumber(docType, companyId, issueDate);
 
     const document = await Document.create({
       docType,
@@ -516,9 +544,26 @@ const fetchConvertDocument = async (req, res) => {
 
     const issueDate = req.body.issueDate ? new Date(req.body.issueDate) : source.issueDate;
 
-    // Proforma and Invoice share the MCI series, so a proforma -> invoice conversion
-    // reuses the exact same number. A quotation lives in the MCQ series, so leaving
-    // that series mints a fresh number in the target series.
+    // Documents reuse a number only when they remain in the same series. With MCP
+    // proformas and MCI tax invoices, conversion mints the target series number.
+    const requestedSerialNumber = req.body.serialNumber
+      ? Number(req.body.serialNumber)
+      : null;
+    if (requestedSerialNumber) {
+      const yearKey = getYearKey(toType, issueDate);
+      const docNumber = buildDocNumber(toType, yearKey, requestedSerialNumber);
+      const existing = await Document.findOne({ docType: toType, docNumber })
+        .select("_id")
+        .lean();
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          message: `Document number ${docNumber} already exists`,
+          statusCode: 409,
+        });
+      }
+    }
+
     const sameSeries = DOC_PREFIX[source.docType] === DOC_PREFIX[toType];
     const numbering = sameSeries
       ? {
@@ -526,7 +571,9 @@ const fetchConvertDocument = async (req, res) => {
           yearKey: source.financialYearOrYear,
           serialNumber: source.serialNumber,
         }
-      : await commitNextNumber(toType, source.company, issueDate);
+      : requestedSerialNumber
+        ? await commitSerialNumber(toType, source.company, issueDate, requestedSerialNumber)
+        : await commitNextNumber(toType, source.company, issueDate);
 
     const sourceTerms = source.notesTerms || "";
     const sourceDefault = (company.defaultTerms && company.defaultTerms[source.docType]) || "";
@@ -971,7 +1018,7 @@ const fetchApproveDocument = async (req, res) => {
     // company's saved authorised signature. One of the two must exist.
     let signaturePath = "";
     if (req.file) {
-      signaturePath = `/uploads/signatures/${req.file.filename}`;
+      signaturePath = await compressImageToDataUrl(req.file, "signatures");
     } else {
       const company = await Company.findById(document.company)
         .select("signatureUrl")

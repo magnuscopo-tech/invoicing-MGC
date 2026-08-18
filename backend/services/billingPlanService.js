@@ -94,9 +94,9 @@ const rebalancePendingInstallments = (plan) => {
 
 /*
  * A plan can be cut from an accepted quotation, or started from scratch when
- * there was never a quotation to begin with. Either way one MCI serial is
- * reserved here and every document in the job prints it - the slices with a
- * letter appended, the closing tax invoice bare.
+ * there was never a quotation to begin with. Either way one MCP serial is
+ * reserved here for the installment proformas; each slice prints it with a
+ * letter appended.
  */
 const fetchCreateBillingPlan = async (req, res) => {
   try {
@@ -852,7 +852,7 @@ const fetchCancelBillingPlan = async (req, res) => {
 /* -------------------------- Raise the closing invoice -------------------------- */
 
 /*
- * ONE tax invoice for the whole job, on the bare reserved number. Splitting is a
+ * ONE tax invoice for the whole job. Splitting is a
  * proforma-only feature: however many slices the client paid in, the tax
  * document is single and carries the full contract value.
  *
@@ -929,13 +929,14 @@ const fetchRaiseFinalInvoice = async (req, res) => {
       null
     );
 
+    const numbering = await commitNextNumber("invoice", plan.company, issueDate);
+
     const invoice = await Document.create({
       docType: "invoice",
       docLabel: DOC_LABELS.invoice,
-      // The bare reserved number - the slices carried it with a letter appended.
-      docNumber: plan.baseDocNumber,
-      financialYearOrYear: plan.baseYearKey,
-      serialNumber: plan.baseSerialNumber,
+      docNumber: numbering.docNumber,
+      financialYearOrYear: numbering.yearKey,
+      serialNumber: numbering.serialNumber,
       company: plan.company,
       client: plan.client,
       issueDate,

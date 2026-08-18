@@ -46,10 +46,10 @@ const DOC_LABELS = {
   invoice: "Tax Invoice",
 };
 
-// Numbering series prefix. Proforma and Invoice deliberately share the MCI series.
+// Numbering series prefix.
 const DOC_PREFIX = {
   quotation: "MCQ",
-  proforma: "MCI",
+  proforma: "MCP",
   invoice: "MCI",
 };
 
@@ -112,9 +112,8 @@ const PERCENT_SCALE = 100;
 
 /*
  * A slice proforma carries the base document number with a letter appended:
- * MCI/26-27/003-A, MCI/26-27/003-B. The closing tax invoice takes the bare
- * MCI/26-27/003, so one job consumes exactly one serial no matter how many
- * slices it was billed in.
+ * MCP/26-27/003-A, MCP/26-27/003-B. One split-billing job consumes exactly one
+ * proforma serial no matter how many slices it was billed in.
  */
 const installmentSuffix = (index) => String.fromCharCode(64 + Number(index));
 

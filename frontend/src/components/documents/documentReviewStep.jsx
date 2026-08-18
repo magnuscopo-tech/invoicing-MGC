@@ -1,6 +1,7 @@
 import NotesTermsEditor from "./notesTermsEditor";
 import TotalsSummary from "./totalsSummary";
 import ItemsTable from "./itemsTable";
+import InputField from "../custom/inputField";
 import { DOC_LABELS } from "../../constants/document.constants";
 import { formatDisplayDate } from "../../Utlis/dateFormat";
 
@@ -16,12 +17,16 @@ const SummaryRow = ({ label, value }) => (
 export default function DocumentReviewStep({
   formData,
   numberPreview = null,
+  displayDocNumber = "",
+  serialValue = "",
+  serialError = "",
   selectedCompany = null,
   selectedClient = null,
   defaultTerms = "",
   totals,
   dueDateLabel = "Due Date",
   onChange = () => {},
+  onSerialChange = () => {},
   onResetTerms = () => {},
 }) {
   return (
@@ -47,8 +52,8 @@ export default function DocumentReviewStep({
                 value={DOC_LABELS[formData.docType]}
               />
               <SummaryRow
-                label="Number (preview)"
-                value={numberPreview?.docNumber}
+                label="Document number"
+                value={displayDocNumber || numberPreview?.docNumber}
               />
               <SummaryRow label="Seller" value={selectedCompany?.name} />
               <SummaryRow label="Buyer" value={selectedClient?.name} />
@@ -62,6 +67,18 @@ export default function DocumentReviewStep({
               />
               <SummaryRow label="Line items" value={formData.items.length} />
             </dl>
+            <div className="mt-5 border-t border-ink-100 pt-5">
+              <InputField
+                label="Serial number"
+                name="serialNumber"
+                value={serialValue}
+                type="text"
+                placeholder="001"
+                error={serialError}
+                hint="Only the last serial part is editable. The prefix and year are fixed by document type and issue date."
+                onChange={(value) => onSerialChange(value)}
+              />
+            </div>
           </div>
 
           <TotalsSummary

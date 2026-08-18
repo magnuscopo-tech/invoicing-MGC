@@ -19,12 +19,11 @@ const buildCounterKey = (docType, companyId, yearKey) =>
 const padSerial = (serial) => String(serial).padStart(SERIAL_PAD_LENGTH, "0");
 
 /*
- * "MCQ/2026-008" for quotations, "MCI/26-27/003" for proforma and invoices.
+ * "MCQ/2026-008" for quotations, "MCP/26-27/003" for proformas,
+ * and "MCI/26-27/003" for invoices.
  *
  * `installmentIndex` is set only for a slice of a split-billed job, and appends
- * a letter: MCI/26-27/003-A, MCI/26-27/003-B. The closing tax invoice passes
- * nothing and so takes the bare number, which is what ties the whole job to one
- * serial however many slices it was billed in.
+ * a letter: MCP/26-27/003-A, MCP/26-27/003-B.
  */
 const buildDocNumber = (docType, yearKey, serial, installmentIndex = null) => {
   const prefix = DOC_PREFIX[docType];
@@ -40,6 +39,15 @@ const getNextSequence = async (key) => {
   const result = await Counter.findOneAndUpdate(
     { key },
     { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  return result.seq;
+};
+
+const reserveSequenceAtLeast = async (key, serial) => {
+  const result = await Counter.findOneAndUpdate(
+    { key },
+    { $max: { seq: serial } },
     { new: true, upsert: true }
   );
   return result.seq;
@@ -79,12 +87,29 @@ const commitNextNumber = async (docType, companyId, date) => {
   };
 };
 
+const commitSerialNumber = async (docType, companyId, date, serialNumber) => {
+  const yearKey = getYearKey(docType, date);
+  const key = buildCounterKey(docType, companyId, yearKey);
+
+  await reserveSequenceAtLeast(key, serialNumber);
+
+  return {
+    docType,
+    yearKey,
+    serialNumber,
+    docNumber: buildDocNumber(docType, yearKey, serialNumber),
+    committed: true,
+  };
+};
+
 module.exports = {
   getYearKey,
   buildCounterKey,
   buildDocNumber,
   padSerial,
   getNextSequence,
+  reserveSequenceAtLeast,
   peekNextNumber,
   commitNextNumber,
+  commitSerialNumber,
 };

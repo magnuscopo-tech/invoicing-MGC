@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Check, Hash, Info, Lock } from "lucide-react";
+import { ArrowRight, Check, Hash, Info, Loader2, Lock } from "lucide-react";
 import BaseModal from "../baseModal";
 import CustomButton from "../../custom/customButton";
 import DatePickerField from "../../custom/datePickerField";
+import InputField from "../../custom/inputField";
 import { classNames } from "../../../Utlis/Common/commonMethod";
 import { toInputDate } from "../../../Utlis/dateFormat";
 import { formatCurrency } from "../../../Utlis/currencyFormat";
@@ -11,8 +12,14 @@ import {
   DOC_LABELS,
   TERMS_STRATEGY,
 } from "../../../constants/document.constants";
-import { handleConvertDocument } from "../../../Services/apiCalling/documentApis";
+import {
+  handleConvertDocument,
+  handleGetNextNumber,
+} from "../../../Services/apiCalling/documentApis";
 import { SuccessMessage } from "../../../Utlis/Toastify/ToastMessage";
+
+const SERIAL_PAD_LENGTH = 3;
+const padSerial = (value) => String(value || "").padStart(SERIAL_PAD_LENGTH, "0");
 
 const TermsPreview = ({ text }) => (
   <p className="mt-2 max-h-24 overflow-y-auto whitespace-pre-line rounded-lg bg-ink-50 px-3 py-2 text-[12px] leading-relaxed text-ink-600">
@@ -30,10 +37,19 @@ export default function ConvertDocumentModal({
   const [toType, setToType] = useState(targets[0] || "");
   const [issueDate, setIssueDate] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [numberPreview, setNumberPreview] = useState(null);
+  const [serialValue, setSerialValue] = useState("");
+  const [serialTouched, setSerialTouched] = useState(false);
+  const [serialError, setSerialError] = useState("");
+  const [loadingNumber, setLoadingNumber] = useState(false);
   const [termsStrategy, setTermsStrategy] = useState(TERMS_STRATEGY.keep);
   const [converting, setConverting] = useState(false);
 
   const defaultTerms = sourceDocument?.company?.defaultTerms;
+  const companyId =
+    typeof sourceDocument?.company === "string"
+      ? sourceDocument.company
+      : sourceDocument?.company?._id;
   const sourceTerms = sourceDocument?.notesTerms || "";
   const sourceDefault = defaultTerms?.[sourceDocument?.docType] || "";
   const targetDefault = defaultTerms?.[toType] || "";
@@ -55,7 +71,28 @@ export default function ConvertDocumentModal({
     setTermsStrategy(TERMS_STRATEGY.keep);
   }, [open, sourceDocument]);
 
-  const reusesNumber = sourceDocument?.docType === "proforma";
+  useEffect(() => {
+    if (!open || !companyId || !toType) return;
+
+    let active = true;
+    setLoadingNumber(true);
+    handleGetNextNumber(toType, companyId, issueDate)
+      .then((preview) => {
+        if (!active) return;
+        setNumberPreview(preview);
+        setSerialValue(preview?.serialNumber ? padSerial(preview.serialNumber) : "");
+        setSerialTouched(false);
+        setSerialError("");
+      })
+      .finally(() => {
+        if (active) setLoadingNumber(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [open, companyId, toType, issueDate]);
+
   const isFixingPrice = toType === "proforma";
 
   const resultingTerms =
@@ -63,7 +100,25 @@ export default function ConvertDocumentModal({
       ? targetDefault
       : sourceTerms;
 
+  const serialNumber = Number(serialValue);
+  const displayDocNumber = useMemo(() => {
+    if (!numberPreview?.docNumber) return "";
+    if (!serialNumber) return numberPreview.docNumber;
+    return numberPreview.docNumber.replace(/\d+$/, padSerial(serialNumber));
+  }, [numberPreview?.docNumber, serialNumber]);
+
+  const onSerialChange = (value) => {
+    setSerialValue(String(value).replace(/\D/g, "").slice(0, 6));
+    setSerialTouched(true);
+    setSerialError("");
+  };
+
   const onConvert = async () => {
+    if (!serialNumber || !Number.isInteger(serialNumber) || serialNumber < 1) {
+      setSerialError("Enter a serial number of 1 or higher.");
+      return;
+    }
+
     setConverting(true);
     try {
       const payload = {
@@ -72,6 +127,7 @@ export default function ConvertDocumentModal({
         // the user picked above rather than something inferred afterwards.
         termsStrategy: termsWereCustom ? termsStrategy : TERMS_STRATEGY.swap,
       };
+      if (serialTouched) payload.serialNumber = serialNumber;
       if (issueDate) payload.issueDate = issueDate;
       if (dueDate) payload.dueDate = dueDate;
 
@@ -162,10 +218,15 @@ export default function ConvertDocumentModal({
         </p>
 
         <p className="flex gap-2.5 rounded-xl bg-ink-50 px-4 py-3 text-[13px] leading-relaxed text-ink-600">
-          <Hash size={15} className="mt-0.5 shrink-0 text-ink-400" />
-          {reusesNumber
-            ? `The tax invoice reuses the exact same number — ${sourceDocument.docNumber}. No new serial is consumed.`
-            : "A new MCI number is minted, because quotations live in the separate MCQ series."}
+          {loadingNumber ? (
+            <Loader2 size={15} className="mt-0.5 shrink-0 animate-spin text-ink-400" />
+          ) : (
+            <Hash size={15} className="mt-0.5 shrink-0 text-ink-400" />
+          )}
+          New number:{" "}
+          <span className="font-mono font-semibold">
+            {displayDocNumber || "checking..."}
+          </span>
         </p>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -183,6 +244,17 @@ export default function ConvertDocumentModal({
             onChange={(value) => setDueDate(value)}
           />
         </div>
+
+        <InputField
+          label="Serial number"
+          name="serialNumber"
+          value={serialValue}
+          type="text"
+          placeholder="001"
+          error={serialError}
+          hint="Only the last serial part is editable. The prefix and year are fixed by document type and issue date."
+          onChange={onSerialChange}
+        />
 
         <div className="border-t border-ink-100 pt-4">
           <p className="field-label">Notes &amp; terms on the new document</p>

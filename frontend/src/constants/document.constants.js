@@ -25,7 +25,7 @@ export const DOC_TYPE_OPTIONS = [
   {
     value: DOC_TYPES.proforma,
     label: "Proforma Invoice",
-    series: "MCI",
+    series: "MCP",
     gstApplicable: true,
     stage: 2,
     summary:
@@ -38,7 +38,7 @@ export const DOC_TYPE_OPTIONS = [
     gstApplicable: true,
     stage: 3,
     summary:
-      "Stage 3 — raised from the proforma. Reuses its number; approving it confirms payment.",
+      "Stage 3 — raised from the proforma. Approving it confirms payment.",
   },
 ];
 

@@ -80,6 +80,7 @@ const createDocumentSchema = Joi.object({
   gstApplicable: Joi.boolean(),
   notesTerms: Joi.string().max(5000).allow(""),
   status: Joi.string().valid(...DOC_STATUSES),
+  serialNumber: Joi.number().integer().min(1).max(999999),
   gstPercent: forbiddenGstPercent,
   ...billingFieldGuards,
 });
@@ -109,6 +110,7 @@ const convertDocumentSchema = Joi.object({
     .messages({ "any.only": "toType must be proforma or invoice" }),
   issueDate: Joi.date().allow(null, ""),
   dueDate: Joi.date().allow(null, ""),
+  serialNumber: Joi.number().integer().min(1).max(999999),
   // "swap" uses the target type's standard terms, "keep" carries the source text over.
   termsStrategy: Joi.string().valid("auto", "keep", "swap").default("auto"),
 });

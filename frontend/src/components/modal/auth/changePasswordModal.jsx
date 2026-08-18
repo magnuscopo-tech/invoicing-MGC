@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { Eye, EyeOff } from "lucide-react";
 import BaseModal from "../baseModal";
 import InputField from "../../custom/inputField";
 import CustomButton from "../../custom/customButton";
@@ -14,7 +15,29 @@ export default function ChangePasswordModal({ open, onClose = () => {} }) {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+  const [visiblePasswords, setVisiblePasswords] = useState({});
   const [saving, setSaving] = useState(false);
+
+  const passwordToggle = (field) => {
+    const isVisible = Boolean(visiblePasswords[field]);
+
+    return (
+      <button
+        type="button"
+        className="rounded-md p-1.5 text-ink-400 transition hover:bg-ink-100 hover:text-ink-700"
+        onClick={() =>
+          setVisiblePasswords((current) => ({
+            ...current,
+            [field]: !current[field],
+          }))
+        }
+        aria-label={isVisible ? "Hide password" : "Show password"}
+        title={isVisible ? "Hide password" : "Show password"}
+      >
+        {isVisible ? <EyeOff size={17} /> : <Eye size={17} />}
+      </button>
+    );
+  };
 
   const onFieldChange = (value, field) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
@@ -54,6 +77,7 @@ export default function ChangePasswordModal({ open, onClose = () => {} }) {
       if (result) {
         SuccessMessage("Password changed. Please log in again.");
         setFormData(EMPTY_FORM);
+        setVisiblePasswords({});
         onClose();
         dispatch(logout());
       }
@@ -84,30 +108,33 @@ export default function ChangePasswordModal({ open, onClose = () => {} }) {
         <InputField
           label="Current password"
           name="currentPassword"
-          type="password"
+          type={visiblePasswords.currentPassword ? "text" : "password"}
           required
           value={formData.currentPassword}
           error={errors.currentPassword}
           onChange={onFieldChange}
+          suffix={passwordToggle("currentPassword")}
         />
         <InputField
           label="New password"
           name="newPassword"
-          type="password"
+          type={visiblePasswords.newPassword ? "text" : "password"}
           required
           hint="At least 8 characters."
           value={formData.newPassword}
           error={errors.newPassword}
           onChange={onFieldChange}
+          suffix={passwordToggle("newPassword")}
         />
         <InputField
           label="Confirm new password"
           name="confirmPassword"
-          type="password"
+          type={visiblePasswords.confirmPassword ? "text" : "password"}
           required
           value={formData.confirmPassword}
           error={errors.confirmPassword}
           onChange={onFieldChange}
+          suffix={passwordToggle("confirmPassword")}
         />
       </div>
     </BaseModal>

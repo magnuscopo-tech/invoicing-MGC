@@ -40,6 +40,9 @@ const STEPS = [
   { title: "Terms & review", hint: "Final check before saving" },
 ];
 
+const SERIAL_PAD_LENGTH = 3;
+const padSerial = (value) => String(value || "").padStart(SERIAL_PAD_LENGTH, "0");
+
 export default function NewDocument() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -49,6 +52,8 @@ export default function NewDocument() {
 
   const [errors, setErrors] = useState({});
   const [numberPreview, setNumberPreview] = useState(null);
+  const [serialValue, setSerialValue] = useState("");
+  const [serialTouched, setSerialTouched] = useState(false);
   const [loadingNumber, setLoadingNumber] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedDocument, setSavedDocument] = useState(null);
@@ -111,6 +116,8 @@ export default function NewDocument() {
         formData.issueDate
       );
       setNumberPreview(preview);
+      setSerialValue(preview?.serialNumber ? padSerial(preview.serialNumber) : "");
+      setSerialTouched(false);
     } finally {
       setLoadingNumber(false);
     }
@@ -135,6 +142,20 @@ export default function NewDocument() {
     dispatch(setDraftField({ field, value }));
     setErrors((previous) => ({ ...previous, [field]: "" }));
   };
+
+  const onSerialChange = (value) => {
+    const digitsOnly = String(value).replace(/\D/g, "").slice(0, 6);
+    setSerialValue(digitsOnly);
+    setSerialTouched(true);
+    setErrors((previous) => ({ ...previous, serialNumber: "" }));
+  };
+
+  const serialNumber = Number(serialValue);
+  const displayDocNumber = useMemo(() => {
+    if (!numberPreview?.docNumber) return "";
+    if (!serialNumber) return numberPreview.docNumber;
+    return numberPreview.docNumber.replace(/\d+$/, padSerial(serialNumber));
+  }, [numberPreview?.docNumber, serialNumber]);
 
   const onAddItem = (item) => {
     dispatch(setDraftItems([...formData.items, item]));
@@ -165,6 +186,12 @@ export default function NewDocument() {
       nextErrors.items = MESSAGES.itemsRequired;
     }
 
+    if (step === 3) {
+      if (!serialNumber || !Number.isInteger(serialNumber) || serialNumber < 1) {
+        nextErrors.serialNumber = "Enter a serial number of 1 or higher.";
+      }
+    }
+
     setErrors(nextErrors);
 
     if (nextErrors.items) ErrorMessage(nextErrors.items);
@@ -179,8 +206,16 @@ export default function NewDocument() {
   const goBack = () => dispatch(setDraftStep(Math.max(activeStep - 1, 0)));
 
   const onSave = async () => {
-    if (!validateStep(1) || !validateStep(2)) {
-      dispatch(setDraftStep(formData.items.length === 0 ? 2 : 1));
+    if (!validateStep(1)) {
+      dispatch(setDraftStep(1));
+      return;
+    }
+    if (!validateStep(2)) {
+      dispatch(setDraftStep(2));
+      return;
+    }
+    if (!validateStep(3)) {
+      dispatch(setDraftStep(3));
       return;
     }
 
@@ -195,6 +230,7 @@ export default function NewDocument() {
         notesTerms: formData.notesTerms,
         items: formData.items,
       };
+      if (serialTouched) payload.serialNumber = serialNumber;
       if (formData.dueDate) payload.dueDate = formData.dueDate;
       if (isQuotation && formData.introLine) {
         payload.introLine = formData.introLine;
@@ -298,12 +334,16 @@ export default function NewDocument() {
           <DocumentReviewStep
             formData={formData}
             numberPreview={numberPreview}
+            displayDocNumber={displayDocNumber}
+            serialValue={serialValue}
+            serialError={errors.serialNumber}
             selectedCompany={selectedCompany}
             selectedClient={selectedClient}
             defaultTerms={defaultTerms}
             totals={totals}
             dueDateLabel={dueDateLabel}
             onChange={onFieldChange}
+            onSerialChange={onSerialChange}
             onResetTerms={() =>
               dispatch(
                 setDraftField({ field: "notesTerms", value: defaultTerms })

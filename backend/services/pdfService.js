@@ -57,6 +57,7 @@ const MIME_BY_EXT = {
 // Puppeteer renders from setContent with no origin, so local images must be inlined.
 const toEmbeddedImage = (publicPath) => {
   if (!publicPath) return "";
+  if (/^data:/i.test(publicPath)) return publicPath;
   try {
     const absolutePath = toAbsolutePublicPath(publicPath);
     if (!fs.existsSync(absolutePath)) return "";

@@ -31,6 +31,7 @@ const removeFileIfExists = (filePath) => {
 // Converts a stored public path ("/uploads/logos/x.png") to an absolute disk path.
 const toAbsolutePublicPath = (publicPath) => {
   if (!publicPath) return "";
+  if (/^(data:|https?:\/\/)/i.test(publicPath)) return "";
   const relative = publicPath.replace(/^\/+/, "");
   return path.join(__dirname, "..", "public", relative);
 };
@@ -38,7 +39,7 @@ const toAbsolutePublicPath = (publicPath) => {
 // Converts a stored public path to an absolute URL for API responses.
 const toPublicUrl = (publicPath) => {
   if (!publicPath) return "";
-  if (/^https?:\/\//i.test(publicPath)) return publicPath;
+  if (/^(https?:\/\/|data:)/i.test(publicPath)) return publicPath;
   const base = (process.env.APP_BASE_URL || "").replace(/\/+$/, "");
   return `${base}${publicPath.startsWith("/") ? "" : "/"}${publicPath}`;
 };

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Invoicing tool backend - Quotation / Proforma Invoice / Tax Invoice generation",
   "main": "app.js",
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js"
@@ -30,6 +33,7 @@
     "morgan": "^1.10.0",
     "multer": "^2.2.0",
     "puppeteer": "^24.43.1",
+    "sharp": "^0.35.3",
     "to-words": "^4.0.0"
   },
   "devDependencies": {

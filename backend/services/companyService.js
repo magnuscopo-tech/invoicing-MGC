@@ -4,12 +4,15 @@ const Document = require("../models/documentModel");
 const User = require("../models/userModel");
 const { recordAudit } = require("./auditLogService");
 const { removeFileIfExists, toPublicUrl } = require("../utils/fileHelper");
+const { compressImageToDataUrl } = require("../utils/imageAssetHelper");
 
 const mapCompany = (company) => ({
   ...company,
   logoUrl: toPublicUrl(company.logoUrl),
   signatureUrl: toPublicUrl(company.signatureUrl),
 });
+
+const isStoredUploadPath = (value) => /^\/?uploads\//i.test(String(value || ""));
 
 const fetchCreateCompany = async (req, res) => {
   try {
@@ -175,16 +178,16 @@ const fetchDeleteCompany = async (req, res) => {
       });
     }
 
-    removeFileIfExists(
-      company.logoUrl
-        ? path.join(__dirname, "..", "public", company.logoUrl.replace(/^\/+/, ""))
-        : ""
-    );
-    removeFileIfExists(
-      company.signatureUrl
-        ? path.join(__dirname, "..", "public", company.signatureUrl.replace(/^\/+/, ""))
-        : ""
-    );
+    if (isStoredUploadPath(company.logoUrl)) {
+      removeFileIfExists(
+        path.join(__dirname, "..", "public", company.logoUrl.replace(/^\/+/, ""))
+      );
+    }
+    if (isStoredUploadPath(company.signatureUrl)) {
+      removeFileIfExists(
+        path.join(__dirname, "..", "public", company.signatureUrl.replace(/^\/+/, ""))
+      );
+    }
     await company.deleteOne();
 
     recordAudit({
@@ -228,10 +231,10 @@ const saveCompanyAsset = async (req, res, field, folder) => {
   }
 
   const previousPath = company[field];
-  company[field] = `/uploads/${folder}/${req.file.filename}`;
+  company[field] = await compressImageToDataUrl(req.file, folder);
   await company.save();
 
-  if (previousPath) {
+  if (isStoredUploadPath(previousPath)) {
     removeFileIfExists(
       path.join(__dirname, "..", "public", previousPath.replace(/^\/+/, ""))
     );
@@ -242,7 +245,11 @@ const saveCompanyAsset = async (req, res, field, folder) => {
     entityId: company._id,
     action: `${folder}_uploaded`,
     performedBy: req.user.mongoId,
-    meta: { file: req.file.filename },
+    meta: {
+      originalName: req.file.originalname,
+      originalSize: req.file.size,
+      storage: "mongodb_data_url",
+    },
   });
 
   return res.status(200).json({
@@ -262,10 +269,10 @@ const fetchUploadCompanyLogo = async (req, res) => {
     return await saveCompanyAsset(req, res, "logoUrl", "logos");
   } catch (error) {
     console.error("Error Upload Company Logo:", error.message);
-    removeFileIfExists(req.file?.path);
+    const statusCode = error.statusCode || 500;
     return res
-      .status(500)
-      .json({ success: false, message: error.message, statusCode: 500 });
+      .status(statusCode)
+      .json({ success: false, message: error.message, statusCode });
   }
 };
 
@@ -274,10 +281,10 @@ const fetchUploadCompanySignature = async (req, res) => {
     return await saveCompanyAsset(req, res, "signatureUrl", "signatures");
   } catch (error) {
     console.error("Error Upload Company Signature:", error.message);
-    removeFileIfExists(req.file?.path);
+    const statusCode = error.statusCode || 500;
     return res
-      .status(500)
-      .json({ success: false, message: error.message, statusCode: 500 });
+      .status(statusCode)
+      .json({ success: false, message: error.message, statusCode });
   }
 };
 

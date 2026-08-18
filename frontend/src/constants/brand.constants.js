@@ -4,6 +4,6 @@ export const BRAND = {
   monogram: "MC",
   product: "Invoicing",
   tagline: "Finance workspace",
-  // Matches the document number series: MCQ for quotations, MCI for invoices.
-  series: ["MCQ", "MCI"],
+  // Matches the document number series.
+  series: ["MCQ", "MCP", "MCI"],
 };

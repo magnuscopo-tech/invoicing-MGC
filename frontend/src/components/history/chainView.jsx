@@ -78,8 +78,7 @@ export default function ChainView({
       </ol>
 
       <p className="mt-3 text-[11px] leading-relaxed text-ink-400">
-        A proforma and its tax invoice intentionally share one number — that is
-        correct, not a duplicate.
+        Each document keeps the number minted for its own series.
       </p>
     </section>
   );

@@ -58,10 +58,9 @@ const billingPlanSchema = new mongoose.Schema(
     },
 
     /*
-     * One serial is reserved from the MCI series for the whole job. Every slice
-     * proforma prints it with a letter appended (…/003-A) and the closing tax
-     * invoice prints it bare (…/003), so the documents visibly belong together
-     * and the series does not inflate with the number of slices.
+     * One serial is reserved from the MCP series for the installment proformas.
+     * Every slice prints it with a letter appended (.../003-A), so the proforma
+     * series does not inflate with the number of slices.
      */
     baseDocNumber: { type: String, required: true },
     baseYearKey: { type: String, required: true },
