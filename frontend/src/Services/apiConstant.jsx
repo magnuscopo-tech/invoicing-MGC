@@ -1,6 +1,12 @@
-const apiUserUrlPrefix =`https://invoicing-mgc.onrender.com/api`;
+const isLocalhost =
+  typeof window !== "undefined" &&
+  ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
-export const apiHost =`https://invoicing-mgc.onrender.com`;
+export const apiHost =
+  import.meta.env.VITE_API_HOST ||
+  (isLocalhost ? "http://localhost:5000" : "https://invoicing-mgc.onrender.com");
+
+const apiUserUrlPrefix = `${apiHost.replace(/\/+$/, "")}/api/`;
 
 export const apiConstant = {
   // Auth
