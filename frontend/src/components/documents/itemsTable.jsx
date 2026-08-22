@@ -7,9 +7,17 @@ import { computeLineAmount } from "../../Utlis/calculations";
 export default function ItemsTable({
   items = [],
   editable = true,
+  separatePricing = true,
+  totalAmount = null,
   onRemove = () => {},
 }) {
   const itemList = itemsOf(items);
+  const mergedTotal =
+    totalAmount ??
+    itemList.reduce(
+      (sum, item) => sum + Number(item.amount ?? computeLineAmount(item) ?? 0),
+      0
+    );
 
   if (itemList.length === 0) {
     return (
@@ -31,9 +39,15 @@ export default function ItemsTable({
             <th className="table-head w-10">#</th>
             <th className="table-head">Description</th>
             <th className="table-head text-right">Qty</th>
-            <th className="table-head text-right">Unit price</th>
-            <th className="table-head text-right">Disc %</th>
-            <th className="table-head text-right">Amount</th>
+            {separatePricing ? (
+              <>
+                <th className="table-head text-right">Unit price</th>
+                <th className="table-head text-right">Disc %</th>
+                <th className="table-head text-right">Amount</th>
+              </>
+            ) : (
+              <th className="table-head text-center">Total</th>
+            )}
             {editable && <th className="table-head w-12" />}
           </tr>
         </thead>
@@ -54,15 +68,26 @@ export default function ItemsTable({
                 </p>
               </td>
               <td className="table-cell text-right">{item.qty}</td>
-              <td className="table-cell text-right">
-                {formatCurrency(item.unitPrice)}
-              </td>
-              <td className="table-cell text-right">
-                {item.discountPercent ? `${item.discountPercent}%` : "—"}
-              </td>
-              <td className="table-cell text-right font-semibold text-ink-950">
-                {formatCurrency(item.amount ?? computeLineAmount(item))}
-              </td>
+              {separatePricing ? (
+                <>
+                  <td className="table-cell text-right">
+                    {formatCurrency(item.unitPrice)}
+                  </td>
+                  <td className="table-cell text-right">
+                    {item.discountPercent ? `${item.discountPercent}%` : "—"}
+                  </td>
+                  <td className="table-cell text-right font-semibold text-ink-950">
+                    {formatCurrency(item.amount ?? computeLineAmount(item))}
+                  </td>
+                </>
+              ) : index === 0 ? (
+                <td
+                  className="table-cell text-center align-middle font-semibold text-ink-950"
+                  rowSpan={itemList.length}
+                >
+                  {formatCurrency(mergedTotal)}
+                </td>
+              ) : null}
               {editable && (
                 <td className="px-4 py-3.5 text-right">
                   <button

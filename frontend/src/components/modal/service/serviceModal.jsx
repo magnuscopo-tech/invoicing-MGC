@@ -25,6 +25,7 @@ const UNIT_OPTIONS = [
   { value: "hour", label: "Hour" },
   { value: "day", label: "Day" },
   { value: "month", label: "Month" },
+  { value: "year", label: "Year" },
   { value: "project", label: "Project" },
 ];
 

@@ -25,9 +25,11 @@ export default function DocumentReviewStep({
   defaultTerms = "",
   totals,
   dueDateLabel = "Due Date",
+  separatePricing = true,
   onChange = () => {},
   onSerialChange = () => {},
   onResetTerms = () => {},
+  onSeparatePricingChange = () => {},
 }) {
   return (
     <section className="space-y-6">
@@ -89,7 +91,31 @@ export default function DocumentReviewStep({
           />
         </div>
 
-        <ItemsTable items={formData.items} editable={false} />
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-ink-200 bg-white px-4 py-3">
+          <p className="text-sm font-semibold text-ink-900">Separate pricing</p>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={separatePricing}
+            onClick={() => onSeparatePricingChange(!separatePricing)}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary-100 ${
+              separatePricing ? "bg-primary-600" : "bg-ink-300"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-[left] duration-200 ${
+                separatePricing ? "left-[22px]" : "left-0.5"
+              }`}
+            />
+          </button>
+        </div>
+
+        <ItemsTable
+          items={formData.items}
+          editable={false}
+          separatePricing={separatePricing}
+          totalAmount={totals.subTotal}
+        />
       </div>
     </section>
   );

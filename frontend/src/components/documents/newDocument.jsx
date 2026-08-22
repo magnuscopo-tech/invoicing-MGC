@@ -58,6 +58,7 @@ export default function NewDocument() {
   const [saving, setSaving] = useState(false);
   const [savedDocument, setSavedDocument] = useState(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [separatePricing, setSeparatePricing] = useState(true);
   const [convertOpen, setConvertOpen] = useState(false);
 
   const selectedCompany = useMemo(
@@ -342,8 +343,10 @@ export default function NewDocument() {
             defaultTerms={defaultTerms}
             totals={totals}
             dueDateLabel={dueDateLabel}
+            separatePricing={separatePricing}
             onChange={onFieldChange}
             onSerialChange={onSerialChange}
+            onSeparatePricingChange={setSeparatePricing}
             onResetTerms={() =>
               dispatch(
                 setDraftField({ field: "notesTerms", value: defaultTerms })
@@ -387,6 +390,7 @@ export default function NewDocument() {
         open={previewOpen}
         documentId={savedDocument?._id}
         docNumber={savedDocument?.docNumber}
+        initialSeparatePricing={separatePricing}
         onClose={() => setPreviewOpen(false)}
       />
 

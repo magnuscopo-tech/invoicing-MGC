@@ -69,6 +69,10 @@ const priceLockReason = (document) => {
   return `This ${DOC_LABELS[document.docType].toLowerCase()} has already been ${document.status} to the client, so its prices are final.`;
 };
 
+const readSeparatePricingOption = (req) => ({
+  separatePricing: req.query?.separatePricing !== "false",
+});
+
 const fetchNextNumber = async (req, res) => {
   try {
     const { type, companyId, date } = req.query;
@@ -728,7 +732,7 @@ const fetchPreviewHtml = async (req, res) => {
         .json({ success: false, message: "Document not found", statusCode: 404 });
     }
 
-    const html = renderHtml(document, "html");
+    const html = renderHtml(document, "html", readSeparatePricingOption(req));
     res.set("Content-Type", "text/html; charset=utf-8");
     return res.status(200).send(html);
   } catch (error) {
@@ -761,7 +765,7 @@ const fetchDownloadDocument = async (req, res) => {
       });
     }
 
-    const buffer = await renderPdfBuffer(document);
+    const buffer = await renderPdfBuffer(document, readSeparatePricingOption(req));
 
     // Handing over the file is the moment a draft stops being one - it is the
     // first point at which the document can leave the building.

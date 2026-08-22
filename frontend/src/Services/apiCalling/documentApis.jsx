@@ -75,9 +75,9 @@ const handleGetDocumentChain = async (id) => {
 };
 
 // Returns the raw HTML string for the preview iframe, not a JSON payload.
-const handlePreviewDocumentHtml = async (id) => {
+const handlePreviewDocumentHtml = async (id, options = {}) => {
   try {
-    const response = await PreviewDocumentHtmlApi(id);
+    const response = await PreviewDocumentHtmlApi(id, options);
     if (response.statusCode === 200) {
       return response.raw.data;
     }
@@ -88,9 +88,9 @@ const handlePreviewDocumentHtml = async (id) => {
   }
 };
 
-const handleDownloadDocument = async (id, docNumber = "document") => {
+const handleDownloadDocument = async (id, docNumber = "document", options = {}) => {
   try {
-    const html = await handlePreviewDocumentHtml(id);
+    const html = await handlePreviewDocumentHtml(id, options);
     return printHtmlAsPdf(html, safeFileName(docNumber));
   } catch (error) {
     console.error("Error downloading document:", error);

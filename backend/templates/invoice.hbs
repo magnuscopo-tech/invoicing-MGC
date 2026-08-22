@@ -10,9 +10,13 @@
         <th style="width:26px;" class="center">#</th>
         <th>Description</th>
         <th style="width:52px;" class="center">Qty</th>
-        <th style="width:92px;" class="num">Unit Price</th>
-        {{#if showDiscountColumn}}<th style="width:64px;" class="num">Disc %</th>{{/if}}
-        <th style="width:104px;" class="num">Amount</th>
+        {{#if separatePricing}}
+          <th style="width:92px;" class="num">Unit Price</th>
+          {{#if showDiscountColumn}}<th style="width:64px;" class="num">Disc %</th>{{/if}}
+          <th style="width:104px;" class="num">Amount</th>
+        {{else}}
+          <th style="width:196px; text-align:center;" class="center">Total</th>
+        {{/if}}
       </tr>
     </thead>
     <tbody>
@@ -24,9 +28,15 @@
             {{#if this.unit}}<div class="item-sub">Unit: {{this.unit}}</div>{{/if}}
           </td>
           <td class="center">{{this.qty}}</td>
-          <td class="num">{{this.unitPriceFormatted}}</td>
-          {{#if ../showDiscountColumn}}<td class="num">{{this.discountPercent}}</td>{{/if}}
-          <td class="num">{{this.amountFormatted}}</td>
+          {{#if ../separatePricing}}
+            <td class="num">{{this.unitPriceFormatted}}</td>
+            {{#if ../showDiscountColumn}}<td class="num">{{this.discountPercent}}</td>{{/if}}
+            <td class="num">{{this.amountFormatted}}</td>
+          {{else}}
+            {{#if @first}}
+              <td class="item-total-merged" rowspan="{{../itemRowSpan}}">{{../subTotalFormatted}}</td>
+            {{/if}}
+          {{/if}}
         </tr>
       {{/each}}
     </tbody>

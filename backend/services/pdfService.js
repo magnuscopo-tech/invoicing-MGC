@@ -134,12 +134,13 @@ const buildSettlementBlock = (document) => {
 
 // mode "pdf" inlines images as data URIs; mode "html" links absolute public URLs so
 // the browser preview and the PDF render from the exact same template and data.
-const buildViewModel = (document, mode = "pdf") => {
+const buildViewModel = (document, mode = "pdf", options = {}) => {
   const company = document.company || {};
   const client = document.client || {};
   const bank = company.bankDetails || {};
   const isQuotation = document.docType === "quotation";
   const resolveImage = mode === "pdf" ? toEmbeddedImage : toPublicUrl;
+  const separatePricing = options.separatePricing !== false;
 
   const showDiscountColumn = (document.items || []).some(
     (item) => Number(item.discountPercent) > 0
@@ -201,7 +202,9 @@ const buildViewModel = (document, mode = "pdf") => {
       bankGstin: bank.bankGstin,
     },
     items,
-    showDiscountColumn,
+    itemRowSpan: items.length || 1,
+    separatePricing,
+    showDiscountColumn: separatePricing && showDiscountColumn,
     gstApplicable: document.gstApplicable,
     gstPercent: GST_PERCENT,
     subTotalFormatted: formatAmount(document.subTotal),
@@ -227,9 +230,9 @@ ${body}
 
 // The preview endpoint and the PDF generator both call this, which is what
 // guarantees the on-screen preview is byte-identical to the printed document.
-const renderHtml = (document, mode = "pdf") => {
+const renderHtml = (document, mode = "pdf", options = {}) => {
   const template = getTemplate(templateForDocType(document.docType));
-  return wrapHtml(`<body>${template(buildViewModel(document, mode))}</body>`);
+  return wrapHtml(`<body>${template(buildViewModel(document, mode, options))}</body>`);
 };
 
 const getBrowser = async () => {
@@ -276,8 +279,8 @@ const PDF_FOOTER_TEMPLATE = `
  * company letterhead or the signature changes, so every request re-renders from
  * the current state instead.
  */
-const renderPdfBuffer = async (document) => {
-  const html = renderHtml(document, "pdf");
+const renderPdfBuffer = async (document, options = {}) => {
+  const html = renderHtml(document, "pdf", options);
   const browser = await getBrowser();
   const page = await browser.newPage();
 

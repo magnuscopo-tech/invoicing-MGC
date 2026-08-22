@@ -133,9 +133,9 @@ export const GetDocumentChainApi = (id) => {
   return apiRequest(apiConstant.getDocumentChain(id), "Get");
 };
 
-export const PreviewDocumentHtmlApi = (id) => {
+export const PreviewDocumentHtmlApi = (id, options = {}) => {
   return apiRequest(
-    apiConstant.previewDocumentHtml(id),
+    apiConstant.previewDocumentHtml(id, options.separatePricing),
     "Get",
     {},
     false,
@@ -144,9 +144,9 @@ export const PreviewDocumentHtmlApi = (id) => {
   );
 };
 
-export const DownloadDocumentApi = (id) => {
+export const DownloadDocumentApi = (id, options = {}) => {
   return apiRequest(
-    apiConstant.downloadDocument(id),
+    apiConstant.downloadDocument(id, options.separatePricing),
     "Get",
     {},
     false,
