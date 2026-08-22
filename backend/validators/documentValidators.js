@@ -11,11 +11,18 @@ const objectId = Joi.string().pattern(OBJECT_ID_REGEX).messages({
   "string.pattern.base": "Must be a valid id",
 });
 
+const includedServiceSchema = Joi.object({
+  title: Joi.string().trim().min(1).max(200).required().messages({
+    "string.empty": "Included service name is required",
+  }),
+});
+
 const itemSchema = Joi.object({
   serviceRef: objectId.allow(null, ""),
   description: Joi.string().trim().min(1).max(1000).required().messages({
     "string.empty": "Item description is required",
   }),
+  includedServices: Joi.array().items(includedServiceSchema).default([]),
   unit: Joi.string().trim().max(30).allow(""),
   qty: Joi.number().min(0).required().messages({
     "number.base": "Item quantity must be a number",

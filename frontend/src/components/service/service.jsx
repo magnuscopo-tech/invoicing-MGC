@@ -134,6 +134,7 @@ export default function Service() {
                 <tbody className="divide-y divide-ink-100">
                   {itemsOf(services).map((service) => {
                     const isInactive = service.isActive === false;
+                    const includedCount = itemsOf(service.includedServices).length;
                     return (
                       <tr
                         key={service._id}
@@ -155,6 +156,12 @@ export default function Service() {
                               ) : (
                                 <p className="mt-0.5 text-[13px] text-ink-400">
                                   No description
+                                </p>
+                              )}
+                              {includedCount > 0 && (
+                                <p className="mt-1 text-[12px] font-semibold text-primary-700">
+                                  {includedCount} included service
+                                  {includedCount === 1 ? "" : "s"}
                                 </p>
                               )}
                             </div>

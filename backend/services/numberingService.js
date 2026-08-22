@@ -53,6 +53,22 @@ const reserveSequenceAtLeast = async (key, serial) => {
   return result.seq;
 };
 
+// Reclaims a deleted draft's number only when it is still the latest committed
+// serial. Older gaps are left alone so a later document number is never reused.
+const releaseSequenceIfLatest = async (docType, companyId, date, serial) => {
+  const yearKey = getYearKey(docType, date);
+  const key = buildCounterKey(docType, companyId, yearKey);
+  const nextSeq = Math.max(Number(serial) - 1, 0);
+
+  const result = await Counter.findOneAndUpdate(
+    { key, seq: Number(serial) },
+    { $set: { seq: nextSeq } },
+    { new: true }
+  ).lean();
+
+  return Boolean(result);
+};
+
 // Read-only peek used by the wizard preview. Does NOT burn a serial, so abandoned
 // drafts never leave gaps in the series.
 const peekNextNumber = async (docType, companyId, date) => {
@@ -109,6 +125,7 @@ module.exports = {
   padSerial,
   getNextSequence,
   reserveSequenceAtLeast,
+  releaseSequenceIfLatest,
   peekNextNumber,
   commitNextNumber,
   commitSerialNumber,

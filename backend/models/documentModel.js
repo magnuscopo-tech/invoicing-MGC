@@ -11,6 +11,10 @@ const itemSchema = new mongoose.Schema(
     // Optional link back to the reusable catalog entry.
     serviceRef: { type: mongoose.Schema.Types.ObjectId, ref: "Service", default: null },
     description: { type: String, required: true, trim: true },
+    includedServices: {
+      type: [{ title: { type: String, required: true, trim: true } }],
+      default: [],
+    },
     unit: { type: String, default: "unit", trim: true },
     qty: { type: Number, required: true, default: 1, min: 0 },
     unitPrice: { type: Number, required: true, min: 0 },

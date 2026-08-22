@@ -1,0 +1,6 @@
+import{c as m,i as u,j as e,g as j,be as v}from"./index-DCR8ni22.js";/**
+ * @license lucide-react v0.451.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const f=m("ChevronDown",[["path",{d:"m6 9 6 6 6-6",key:"qrunsl"}]]);function b({label:t,name:l,value:i="",options:r=[],placeholder:c="Select an option",error:a="",hint:n="",required:o=!1,disabled:d=!1,className:x="",onChange:p=()=>{}}){const h=u(r);return e.jsxs("div",{className:x,children:[t&&e.jsxs("label",{className:"field-label",htmlFor:l,children:[t,o&&e.jsx("span",{className:"ml-0.5 text-red-500",children:"*"})]}),e.jsxs("div",{className:"relative",children:[e.jsxs("select",{id:l,name:l,value:i??"",disabled:d,onChange:s=>p(s.target.value,l),className:j("field-input cursor-pointer appearance-none pr-10",!i&&"text-ink-400",a&&"field-input-error"),children:[e.jsx("option",{value:"",children:c}),h.map(s=>e.jsx("option",{value:s.value,children:s.label},s.value))]}),e.jsx(f,{size:16,className:"pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-400"})]}),a?e.jsxs("p",{className:"field-error",children:[e.jsx(v,{size:13})," ",a]}):n&&e.jsx("p",{className:"mt-1.5 text-xs text-ink-400",children:n})]})}export{b as S};

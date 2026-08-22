@@ -19,6 +19,7 @@ const {
   commitSerialNumber,
   getYearKey,
   buildDocNumber,
+  releaseSequenceIfLatest,
 } = require("./numberingService");
 const { renderHtml, renderPdfBuffer } = require("./pdfService");
 const { recordAudit } = require("./auditLogService");
@@ -908,18 +909,28 @@ const fetchDeleteDocument = async (req, res) => {
       });
     }
     await document.deleteOne();
+    const numberReleased = await releaseSequenceIfLatest(
+      document.docType,
+      document.company,
+      document.issueDate,
+      document.serialNumber
+    );
 
     recordAudit({
       documentId: document._id,
       action: "deleted",
       performedBy: req.user.mongoId,
-      meta: { docNumber: document.docNumber, docType: document.docType },
+      meta: {
+        docNumber: document.docNumber,
+        docType: document.docType,
+        numberReleased,
+      },
     });
 
     return res.status(200).json({
       success: true,
       message: "Document deleted successfully",
-      data: { _id: document._id, softDeleted: false },
+      data: { _id: document._id, softDeleted: false, numberReleased },
       statusCode: 200,
     });
   } catch (error) {

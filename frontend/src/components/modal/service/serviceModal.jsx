@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import BaseModal from "../baseModal";
 import InputField from "../../custom/inputField";
 import TextAreaField from "../../custom/textAreaField";
@@ -17,6 +18,7 @@ const EMPTY_FORM = {
   description: "",
   defaultUnitPrice: "",
   unit: "unit",
+  includedServices: [],
 };
 
 const UNIT_OPTIONS = [
@@ -48,6 +50,9 @@ export default function ServiceModal({
               ...EMPTY_FORM,
               ...service,
               defaultUnitPrice: service.defaultUnitPrice ?? "",
+              includedServices: Array.isArray(service.includedServices)
+                ? service.includedServices
+                : [],
             }
           : EMPTY_FORM
       );
@@ -58,6 +63,31 @@ export default function ServiceModal({
   const onFieldChange = (value, field) => {
     setFormData((previous) => ({ ...previous, [field]: value }));
     setErrors((previous) => ({ ...previous, [field]: "" }));
+  };
+
+  const onIncludedServiceChange = (index, value) => {
+    setFormData((previous) => ({
+      ...previous,
+      includedServices: previous.includedServices.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, title: value } : item
+      ),
+    }));
+  };
+
+  const addIncludedService = () => {
+    setFormData((previous) => ({
+      ...previous,
+      includedServices: [...previous.includedServices, { title: "" }],
+    }));
+  };
+
+  const removeIncludedService = (index) => {
+    setFormData((previous) => ({
+      ...previous,
+      includedServices: previous.includedServices.filter(
+        (_, itemIndex) => itemIndex !== index
+      ),
+    }));
   };
 
   const validate = () => {
@@ -87,6 +117,9 @@ export default function ServiceModal({
         description: formData.description?.trim() || undefined,
         defaultUnitPrice: Number(formData.defaultUnitPrice) || 0,
         unit: formData.unit || "unit",
+        includedServices: formData.includedServices
+          .map((item) => ({ title: item.title?.trim() || "" }))
+          .filter((item) => item.title),
       };
 
       const result = isEdit
@@ -162,6 +195,50 @@ export default function ServiceModal({
           value={formData.unit}
           onChange={onFieldChange}
         />
+
+        <div className="sm:col-span-2">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <label className="text-[13px] font-semibold text-ink-700">
+              Included services
+            </label>
+            <button
+              type="button"
+              onClick={addIncludedService}
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[12px] font-semibold text-primary-700 transition-colors hover:bg-primary-50"
+            >
+              <Plus size={14} />
+              Add
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {formData.includedServices.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-ink-200 px-3 py-2.5 text-[13px] text-ink-400">
+                No included services added.
+              </div>
+            ) : (
+              formData.includedServices.map((item, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <InputField
+                    className="flex-1"
+                    name={`includedService-${index}`}
+                    placeholder="Example: UI/UX Design"
+                    value={item.title}
+                    onChange={(value) => onIncludedServiceChange(index, value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeIncludedService(index)}
+                    className="mt-1 rounded-lg p-2 text-ink-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                    title="Remove included service"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     </BaseModal>
   );

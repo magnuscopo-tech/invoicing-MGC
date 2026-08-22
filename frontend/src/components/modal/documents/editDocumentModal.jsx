@@ -26,6 +26,9 @@ const toComparableItems = (items = []) =>
   JSON.stringify(
     itemsOf(items).map((item) => ({
       description: String(item.description || "").trim(),
+      includedServices: itemsOf(item.includedServices).map((included) => ({
+        title: String(included.title || "").trim(),
+      })),
       unit: item.unit || "unit",
       qty: Number(item.qty) || 0,
       unitPrice: Number(item.unitPrice) || 0,
@@ -121,6 +124,11 @@ export default function EditDocumentModal({
         payload.items = itemsOf(items).map((item) => ({
           serviceRef: item.serviceRef || undefined,
           description: item.description,
+          includedServices: itemsOf(item.includedServices)
+            .map((included) => ({
+              title: String(included.title || "").trim(),
+            }))
+            .filter((included) => included.title),
           unit: item.unit || "unit",
           qty: Number(item.qty),
           unitPrice: Number(item.unitPrice),

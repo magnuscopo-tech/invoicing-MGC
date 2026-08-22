@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import SelectField from "../custom/selectField";
 import InputField from "../custom/inputField";
 import CustomButton from "../custom/customButton";
@@ -15,6 +15,7 @@ const EMPTY_LINE = {
   qty: 1,
   unitPrice: "",
   discountPercent: 0,
+  includedServices: [],
 };
 
 export default function ItemBuilder({ services = [], onAdd = () => {} }) {
@@ -25,6 +26,31 @@ export default function ItemBuilder({ services = [], onAdd = () => {} }) {
   const onFieldChange = (value, field) => {
     setLine((previous) => ({ ...previous, [field]: value }));
     setErrors((previous) => ({ ...previous, [field]: "" }));
+  };
+
+  const onIncludedServiceChange = (index, value) => {
+    setLine((previous) => ({
+      ...previous,
+      includedServices: previous.includedServices.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, title: value } : item
+      ),
+    }));
+  };
+
+  const addIncludedService = () => {
+    setLine((previous) => ({
+      ...previous,
+      includedServices: [...previous.includedServices, { title: "" }],
+    }));
+  };
+
+  const removeIncludedService = (index) => {
+    setLine((previous) => ({
+      ...previous,
+      includedServices: previous.includedServices.filter(
+        (_, itemIndex) => itemIndex !== index
+      ),
+    }));
   };
 
   // Picking a catalog service seeds description, price and unit — all editable.
@@ -40,6 +66,9 @@ export default function ItemBuilder({ services = [], onAdd = () => {} }) {
         service?.defaultUnitPrice !== undefined
           ? service.defaultUnitPrice
           : previous.unitPrice,
+      includedServices: Array.isArray(service?.includedServices)
+        ? service.includedServices.map((item) => ({ title: item.title || "" }))
+        : [],
     }));
     setErrors({});
   };
@@ -73,6 +102,9 @@ export default function ItemBuilder({ services = [], onAdd = () => {} }) {
       qty: Number(line.qty),
       unitPrice: Number(line.unitPrice),
       discountPercent: Number(line.discountPercent) || 0,
+      includedServices: line.includedServices
+        .map((item) => ({ title: item.title?.trim() || "" }))
+        .filter((item) => item.title),
     });
 
     setLine(EMPTY_LINE);
@@ -165,6 +197,50 @@ export default function ItemBuilder({ services = [], onAdd = () => {} }) {
             Add item
           </CustomButton>
         </div>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-ink-100 bg-white/70 p-3">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="text-[13px] font-semibold text-ink-700">
+            Included services
+          </p>
+          <button
+            type="button"
+            onClick={addIncludedService}
+            className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[12px] font-semibold text-primary-700 transition-colors hover:bg-primary-50"
+          >
+            <Plus size={14} />
+            Add
+          </button>
+        </div>
+
+        {line.includedServices.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-ink-200 px-3 py-2 text-[13px] text-ink-400">
+            No included services for this item.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {line.includedServices.map((item, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <InputField
+                  className="flex-1"
+                  name={`lineIncludedService-${index}`}
+                  placeholder="Example: UI/UX Design"
+                  value={item.title}
+                  onChange={(value) => onIncludedServiceChange(index, value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeIncludedService(index)}
+                  className="mt-1 rounded-lg p-2 text-ink-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                  title="Remove included service"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

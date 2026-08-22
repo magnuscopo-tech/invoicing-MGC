@@ -63,6 +63,15 @@ export default function ItemsTable({
                 <p className="text-sm font-medium text-ink-900">
                   {item.description}
                 </p>
+                {itemsOf(item.includedServices).length > 0 && (
+                  <ul className="mt-2 space-y-1 pl-4 text-[12px] text-ink-500">
+                    {itemsOf(item.includedServices).map((included, includedIndex) => (
+                      <li key={`${included.title}-${includedIndex}`} className="list-disc">
+                        {included.title}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <p className="mt-0.5 text-xs capitalize text-ink-400">
                   per {item.unit || "unit"}
                 </p>

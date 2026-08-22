@@ -149,6 +149,11 @@ const buildViewModel = (document, mode = "pdf", options = {}) => {
   const items = (document.items || []).map((item, idx) => ({
     index: idx + 1,
     description: item.description,
+    includedServices: Array.isArray(item.includedServices)
+      ? item.includedServices
+          .map((included) => ({ title: String(included?.title || "").trim() }))
+          .filter((included) => included.title)
+      : [],
     unit: item.unit,
     qty: item.qty,
     // An en dash reads as "no discount"; a printed 0 reads as a rate someone set.

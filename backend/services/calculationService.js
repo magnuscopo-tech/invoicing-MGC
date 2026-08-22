@@ -14,6 +14,13 @@ const normalizeItems = (items = []) =>
   items.map((item) => ({
     serviceRef: item.serviceRef || null,
     description: String(item.description || "").trim(),
+    includedServices: Array.isArray(item.includedServices)
+      ? item.includedServices
+          .map((included) => ({
+            title: String(included?.title || "").trim(),
+          }))
+          .filter((included) => included.title)
+      : [],
     unit: item.unit ? String(item.unit).trim() : "unit",
     qty: Number(item.qty) || 0,
     unitPrice: round2(item.unitPrice),

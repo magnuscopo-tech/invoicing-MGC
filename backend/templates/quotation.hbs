@@ -29,6 +29,13 @@
           <td class="center item-index">{{this.index}}</td>
           <td>
             <div class="item-desc">{{this.description}}</div>
+            {{#if this.includedServices.length}}
+              <ul class="included-services">
+                {{#each this.includedServices}}
+                  <li>{{this.title}}</li>
+                {{/each}}
+              </ul>
+            {{/if}}
             {{#if this.unit}}<div class="item-sub">Unit: {{this.unit}}</div>{{/if}}
           </td>
           <td class="center">{{this.qty}}</td>
