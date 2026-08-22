@@ -1,4 +1,4 @@
-const apiUserUrlPrefix =`https://invoicing-mgc.onrender.com/api/`;
+const apiUserUrlPrefix =`https://invoicing-mgc.onrender.com/api`;
 
 export const apiHost =`https://invoicing-mgc.onrender.com`;
 
@@ -47,9 +47,10 @@ export const apiConstant = {
   getDocumentDetail: (id) =>
     `${apiUserUrlPrefix}document/getDocumentDetail/${id}`,
   getDocumentChain: (id) => `${apiUserUrlPrefix}document/getDocumentChain/${id}`,
-  previewDocumentHtml: (id) =>
-    `${apiUserUrlPrefix}document/previewDocumentHtml/${id}`,
-  downloadDocument: (id) => `${apiUserUrlPrefix}document/downloadDocument/${id}`,
+  previewDocumentHtml: (id, separatePricing = true) =>
+    `${apiUserUrlPrefix}document/previewDocumentHtml/${id}?separatePricing=${separatePricing}`,
+  downloadDocument: (id, separatePricing = true) =>
+    `${apiUserUrlPrefix}document/downloadDocument/${id}?separatePricing=${separatePricing}`,
   createDocument: apiUserUrlPrefix + "document/createDocument",
   convertDocument: (id) => `${apiUserUrlPrefix}document/convertDocument/${id}`,
   updateDocument: (id) => `${apiUserUrlPrefix}document/updateDocument/${id}`,

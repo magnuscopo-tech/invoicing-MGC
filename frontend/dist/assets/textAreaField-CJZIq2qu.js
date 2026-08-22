@@ -1,6 +1,0 @@
-import{c as j,j as e,g as m,be as u}from"./index-CRWNngcP.js";/**
- * @license lucide-react v0.451.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const f=j("Trash2",[["path",{d:"M3 6h18",key:"d0wm0j"}],["path",{d:"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6",key:"4alrt4"}],["path",{d:"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2",key:"v07s0e"}],["line",{x1:"10",x2:"10",y1:"11",y2:"17",key:"1uufr5"}],["line",{x1:"14",x2:"14",y1:"11",y2:"17",key:"xtxkd"}]]);function o({label:l,name:s,value:r="",placeholder:i="",error:a="",hint:t="",rows:x=4,required:c=!1,disabled:d=!1,className:n="",onChange:h=()=>{}}){return e.jsxs("div",{className:n,children:[l&&e.jsxs("label",{className:"field-label",htmlFor:s,children:[l,c&&e.jsx("span",{className:"ml-0.5 text-red-500",children:"*"})]}),e.jsx("textarea",{id:s,name:s,rows:x,value:r??"",placeholder:i,disabled:d,onChange:p=>h(p.target.value,s),className:m("field-input resize-y leading-relaxed",a&&"field-input-error")}),a?e.jsxs("p",{className:"field-error",children:[e.jsx(u,{size:13})," ",a]}):t&&e.jsx("p",{className:"mt-1.5 text-xs text-ink-400",children:t})]})}export{f as T,o as a};
