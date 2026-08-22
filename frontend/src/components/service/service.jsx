@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Package, Plus } from "lucide-react";
+import { Package, Pencil, Plus, Trash2 } from "lucide-react";
 import PageHeader from "../custom/pageHeader";
 import SearchInput from "../custom/searchInput";
 import CustomButton from "../custom/customButton";
 import EmptyState from "../custom/emptyState";
 import Pagination from "../custom/pagination";
-import CardGridLoader from "../loader/cardGridLoader";
-import ServiceCard from "./serviceCard";
+import TableLoader from "../loader/tableLoader";
+import StatusBadge from "../custom/statusBadge";
 import ServiceModal from "../modal/service/serviceModal";
 import ConfirmDialog from "../modal/confirmDialog";
 import useDebounce from "../../hooks/useDebounce";
@@ -17,6 +17,7 @@ import {
   handleGetAllServices,
 } from "../../Services/apiCalling/serviceApis";
 import { itemsOf } from "../../Utlis/Common/commonMethod";
+import { formatCurrency } from "../../Utlis/currencyFormat";
 import { SuccessMessage } from "../../Utlis/Toastify/ToastMessage";
 
 const LIMIT = 12;
@@ -96,7 +97,9 @@ export default function Service() {
       </PageHeader>
 
       {loading ? (
-        <CardGridLoader count={6} />
+        <div className="card overflow-hidden p-0">
+          <TableLoader rows={6} columns={5} />
+        </div>
       ) : itemsOf(services).length === 0 ? (
         <div className="card">
           <EmptyState
@@ -116,16 +119,89 @@ export default function Service() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {itemsOf(services).map((service) => (
-              <ServiceCard
-                key={service._id}
-                service={service}
-                canDelete={isAdmin}
-                onEdit={(item) => setFormModal({ open: true, service: item })}
-                onDelete={setDeleteTarget}
-              />
-            ))}
+          <div className="card overflow-hidden p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px]">
+                <thead className="bg-ink-50">
+                  <tr>
+                    <th className="table-head">Service</th>
+                    <th className="table-head">Unit</th>
+                    <th className="table-head text-right">Default price</th>
+                    <th className="table-head text-center">Status</th>
+                    <th className="table-head w-24 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ink-100">
+                  {itemsOf(services).map((service) => {
+                    const isInactive = service.isActive === false;
+                    return (
+                      <tr
+                        key={service._id}
+                        className="animate-fade-in transition-colors hover:bg-ink-50/60"
+                      >
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-start gap-3">
+                            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                              <Package size={16} strokeWidth={2} />
+                            </span>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-ink-950">
+                                {service.name}
+                              </p>
+                              {service.description ? (
+                                <p className="mt-0.5 max-w-xl truncate text-[13px] text-ink-500">
+                                  {service.description}
+                                </p>
+                              ) : (
+                                <p className="mt-0.5 text-[13px] text-ink-400">
+                                  No description
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="table-cell capitalize">
+                          {service.unit || "unit"}
+                        </td>
+                        <td className="table-cell text-right font-semibold text-ink-950">
+                          {formatCurrency(service.defaultUnitPrice)}
+                        </td>
+                        <td className="table-cell text-center">
+                          <StatusBadge
+                            label={isInactive ? "Inactive" : "Active"}
+                            tone={isInactive ? "danger" : "success"}
+                          />
+                        </td>
+                        <td className="px-4 py-3.5 text-right">
+                          <span className="inline-flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormModal({ open: true, service })
+                              }
+                              className="rounded-lg p-1.5 text-ink-500 transition-colors hover:bg-primary-50 hover:text-primary-700"
+                              title="Edit service"
+                            >
+                              <Pencil size={15} />
+                            </button>
+                            {isAdmin && (
+                              <button
+                                type="button"
+                                onClick={() => setDeleteTarget(service)}
+                                className="rounded-lg p-1.5 text-ink-500 transition-colors hover:bg-red-50 hover:text-red-600"
+                                title="Delete service"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            )}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="card mt-5">
