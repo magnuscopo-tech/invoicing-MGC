@@ -11,6 +11,7 @@ const multer = require("multer");
 const connectDb = require("./config/db");
 const { ensureDirectory } = require("./utils/fileHelper");
 const { closeBrowser } = require("./services/pdfService");
+const { startApprovedDocumentsCron } = require("./scripts/approvedDocumentsCron");
 
 const authRouter = require("./router/authRoutes");
 const companyRouter = require("./router/companyRoutes");
@@ -104,6 +105,7 @@ app.use((err, req, res, next) => {
 
 const startServer = async () => {
   await connectDb();
+  startApprovedDocumentsCron();
   const server = app.listen(PORT, () =>
     console.log(`Invoicing API listening on port ${PORT}`)
   );
