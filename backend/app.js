@@ -118,6 +118,14 @@ const startServer = async () => {
   );
 };
 
-startServer();
+// When this file is the process entrypoint (for example, `npm start`), this
+// application owns the HTTP server. Hosting runtimes such as OpenLiteSpeed
+// import the exported Express app and call listen() themselves, so calling it
+// here as well would attempt to bind the same server twice.
+if (require.main === module) {
+  startServer();
+} else {
+  connectDb();
+}
 
 module.exports = app;
