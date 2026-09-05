@@ -23,6 +23,10 @@ const {
 } = require("./numberingService");
 const { renderHtml, renderPdfBuffer } = require("./pdfService");
 const { recordAudit } = require("./auditLogService");
+const {
+  sendApprovalRequestEmail,
+  sendDocumentApprovedEmail,
+} = require("../mailer/documentMailer");
 const { mapDocumentListItem, mapDocumentDetail } = require("../responses/documentResponse");
 const { sanitizeFileName } = require("../utils/fileHelper");
 const { compressImageToDataUrl } = require("../utils/imageAssetHelper");
@@ -999,6 +1003,10 @@ const fetchSubmitForApproval = async (req, res) => {
     });
 
     const updated = await loadDocumentForRender(document._id);
+    sendApprovalRequestEmail(updated, req.user).catch((error) => {
+      console.error("Approval Request Email Hook Error:", error.message);
+    });
+
     return res.status(200).json({
       success: true,
       message: "Document sent for approval",
@@ -1144,6 +1152,10 @@ const fetchApproveDocument = async (req, res) => {
     });
 
     const updated = await loadDocumentForRender(document._id);
+    sendDocumentApprovedEmail(updated, req.user).catch((error) => {
+      console.error("Document Approved Email Hook Error:", error.message);
+    });
+
     return res.status(200).json({
       success: true,
       message: settlesPayment
