@@ -8,8 +8,7 @@ require("../models/clientModel");
 const documentApprovalTemplate = require("../emailTemplates/documents/documentApprovalTemplate");
 const monthlyApprovedDocumentsTemplate = require("../emailTemplates/documents/monthlyApprovedDocumentsTemplate");
 const { noReplyTransporter } = require("../config/transporter");
-const { renderPdfBuffer } = require("../services/pdfService");
-const { sanitizeFileName } = require("../utils/fileHelper");
+
 const { formatDisplayDate } = require("../utils/dateHelper");
 
 const senderAddress = () =>
@@ -31,11 +30,6 @@ const findActiveEmailsByRole = async (role) => {
   return users.map((user) => user.email);
 };
 
-const buildAttachment = async (document) => ({
-  filename: `${sanitizeFileName(document.docNumber || "document")}.pdf`,
-  content: await renderPdfBuffer(document),
-  contentType: "application/pdf",
-});
 
 const sendDocumentApprovalEmail = async ({
   document,
@@ -49,7 +43,7 @@ const sendDocumentApprovalEmail = async ({
   if (!recipients.length) return false;
 
   try {
-    const attachment = await buildAttachment(document);
+
     await noReplyTransporter.sendMail({
       from: senderAddress(),
       to: recipients,
@@ -60,7 +54,7 @@ const sendDocumentApprovalEmail = async ({
         eventLabel,
         recipientLabel,
       }),
-      attachments: [attachment],
+
     });
     return true;
   } catch (error) {
