@@ -4,7 +4,7 @@ const isLocalhost =
 
 export const apiHost =
   import.meta.env.VITE_API_HOST ||
-  (isLocalhost ? "http://localhost:5000" : "https://invoicing-mgc.onrender.com");
+  (isLocalhost ? "http://localhost:5000" : "https://pink-oryx-948950.hostingersite.com");
 
 const apiUserUrlPrefix = `${apiHost.replace(/\/+$/, "")}/api/`;
 
